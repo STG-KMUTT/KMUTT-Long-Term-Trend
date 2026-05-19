@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+web/node_modules/
+
+# build outputs
+web/dist/
+web/build/
+
+# environment
+.env
+.env.local
+
+# editor
+.vscode/
+.idea/
+
+# os
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Claude / preview
+.claude/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# intermediate data
+*.raw.json
+slides_full.txt
