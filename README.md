@@ -32,18 +32,29 @@ npm install
 npm run dev      # http://localhost:5173
 ```
 
-## Updating data from a new PPT
+## Updating data
 
-1. Drop the new `.pptx` next to this README (keep the filename or update `build_chart_json.py`).
-2. From the repo root:
-   ```bash
-   pip install python-pptx
-   python build_chart_json.py
-   ```
-3. Inspect the diff in `web/src/data/*.json`, commit, push.
+The dashboard is driven by `web/src/data/*.json` files. These are generated
+from a Google Sheets workbook via a "Publish to Dashboard" menu button — no
+Git or CLI required for day-to-day data updates.
 
-Translations and methodology notes live in `build_chart_json.py` (per-slide `SPECS` dict)
-so they survive re-extraction.
+The workbook has a fixed tab layout: one `INDEX` tab, two style tabs
+(`STYLE_CHARTS`, `STYLE_SERIES`), and approximately 20 chart tabs (one per
+chart). Data collectors edit the chart tabs and click **Publish all changes**;
+an Apps Script triggers a GitHub Actions workflow that validates, commits the
+JSON, and redeploys GitHub Pages automatically.
+
+**For data collectors:** see [`docs/data-collector-guide-th.md`](docs/data-collector-guide-th.md) (Thai).
+
+**For developers:** see [`docs/architecture.md`](docs/architecture.md) for the
+end-to-end architecture, [`docs/runbook-initial-setup.md`](docs/runbook-initial-setup.md)
+for first-time repo + Sheets setup, and
+[`docs/superpowers/specs/2026-05-25-google-sheets-data-source-design.md`](docs/superpowers/specs/2026-05-25-google-sheets-data-source-design.md)
+for the design rationale.
+
+The legacy PPTX-driven flow (`build_chart_json.py`) is deprecated but retained
+for reference until one full annual cycle of the Sheets-based flow has been
+completed.
 
 ## Deployment (GitHub Pages)
 

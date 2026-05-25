@@ -1,4 +1,13 @@
-"""Build bilingual chart JSON files from the PPTX.
+"""DEPRECATED — Replaced by scripts/sync_from_sheets.py.
+
+Kept temporarily for reference / rollback. Will be removed after one
+successful annual cycle of the Sheets-based flow.
+
+See docs/superpowers/specs/2026-05-25-google-sheets-data-source-design.md
+
+---
+
+Build bilingual chart JSON files from the PPTX.
 
 Numbers come straight from PPTX. Translations and metadata are kept here so
 they survive PPT re-extraction. Run this whenever PPT updates.
