@@ -692,14 +692,14 @@ GOOD_CHART = {
     "title": {"th": "x", "en": "y"}, "subtitle": {"th": "x", "en": "y"},
     "categories_buddhist": ["2566", "2567", "2568"],
     "series": [
-        {"key": "bachelor", "name": {"th": "x", "en": "y"}, "color": "#000",
+        {"key": "bachelor", "name": {"th": "x", "en": "y"}, "color": "#000000",
          "values": [1, 2, 3]},
     ],
     "methodology": {"th": "x", "en": "y"},
     "source": {"th": "x", "en": "y"},
 }
 STYLE_CHARTS = {"students-all": {"section": "education", "chart_type": "line"}}
-STYLE_SERIES = {("students-all", "bachelor"): {"color": "#000", "flags": []}}
+STYLE_SERIES = {("students-all", "bachelor"): {"color": "#000000", "flags": []}}
 
 def test_valid_chart_produces_no_errors():
     errors = validate({"EDU-students-all": GOOD_CHART}, STYLE_CHARTS, STYLE_SERIES)
@@ -777,9 +777,21 @@ def test_invalid_hex_color_in_style_flagged():
     assert any("invalid hex color" in e["message_en"] for e in errors)
 
 def test_unknown_flag_in_style_flagged():
-    bad_style = {("students-all", "bachelor"): {"color": "#000", "flags": ["bogus"]}}
+    bad_style = {("students-all", "bachelor"): {"color": "#000000", "flags": ["bogus"]}}
     errors = validate({"EDU-students-all": GOOD_CHART}, STYLE_CHARTS, bad_style)
     assert any("unknown flag" in e["message_en"] and "bogus" in e["message_en"] for e in errors)
+
+def test_series_declared_in_style_but_missing_from_tab_flagged():
+    """Critical: prevents data collector from deleting a header row and
+    crashing the React KpiCard which does `series.values` directly."""
+    # STYLE-series declares two series; chart only has 'bachelor'
+    style = {
+        ("students-all", "bachelor"): {"color": "#000000", "flags": []},
+        ("students-all", "extra"):    {"color": "#111111", "flags": []},
+    }
+    errors = validate({"EDU-students-all": GOOD_CHART}, STYLE_CHARTS, style)
+    assert any("'extra'" in e["message_en"] and "missing from chart tab" in e["message_en"]
+               for e in errors)
 ```
 
 - [ ] **Step 2: Verify tests fail**
@@ -905,6 +917,20 @@ def validate(
                 f"ไม่พบ tab สำหรับกราฟ '{cid}' (อยู่ใน STYLE-charts)",
                 f"missing chart tab for '{cid}' (declared in STYLE-charts)"))
 
+    # Cross-check: every series declared in STYLE-series must exist in its
+    # chart tab. Without this, blanking the entire row-14 header would
+    # publish series:[] and crash the React KpiCard at runtime.
+    expected_by_chart: dict[str, set[str]] = {}
+    for (cid, sk) in style_series:
+        expected_by_chart.setdefault(cid, set()).add(sk)
+    for tab, data in parsed_charts.items():
+        cid = data["id"]
+        actual_keys = {s["key"] for s in data["series"] if s["key"].strip()}
+        for sk in expected_by_chart.get(cid, set()) - actual_keys:
+            errors.append(_err(tab, f"series.{sk}",
+                f"ขาด series '{sk}' (ระบุไว้ใน STYLE-series)",
+                f"series '{sk}' declared in STYLE-series but missing from chart tab"))
+
     return errors
 ```
 
@@ -935,7 +961,7 @@ CHART = {
     "title": {"th": "x", "en": "y"}, "subtitle": {"th": "x", "en": "y"},
     "categories_buddhist": ["2566", "2567"],
     "series": [{"key": "bachelor", "name": {"th": "x", "en": "y"},
-                "color": "#000", "values": [1, 2]}],
+                "color": "#000000", "values": [1, 2]}],
     "methodology": {"th": "x", "en": "y"},
     "source": {"th": "x", "en": "y"},
 }
@@ -1319,13 +1345,25 @@ on:
   repository_dispatch:
     types: [sync-sheets]
 
+# pages + id-token are required by the deploy job;
+# contents:write is required by the sync job to commit JSON;
+# actions:read is required so jobs can read each other's outputs/artifacts.
 permissions:
   contents: write
+  pages: write
+  id-token: write
   actions: read
+
+# Avoid two concurrent publishes racing each other into Pages.
+concurrency:
+  group: sync-from-sheets
+  cancel-in-progress: false
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    outputs:
+      did_commit: ${{ steps.commit.outputs.did_commit }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -1392,17 +1430,45 @@ jobs:
           git push
           echo "did_commit=true" >> "$GITHUB_OUTPUT"
 
-      - name: Trigger deploy.yml explicitly
-        # The plain `git push` above does NOT trigger deploy.yml because
-        # commits made with GITHUB_TOKEN are exempt from kicking off
-        # downstream workflows. We bridge that gap by explicitly dispatching
-        # deploy.yml — `workflow_dispatch` IS allowed for GITHUB_TOKEN.
-        # See: https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication
-        if: success() && steps.commit.outputs.did_commit == 'true'
+  # The deploy job replicates the existing deploy.yml steps and ALWAYS runs
+  # after a successful non-dry-run sync — even when no JSON changed. This
+  # makes "click Publish again" a valid recovery action when Pages got out
+  # of sync with main (e.g. a previous deploy failed). It also ensures the
+  # Apps Script modal only reports "success" after the dashboard has
+  # actually been redeployed.
+  deploy:
+    needs: sync
+    if: success() && github.event.client_payload.dry_run != true
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    defaults:
+      run:
+        working-directory: ./web
+    steps:
+      # Always check out main HEAD; if sync committed, this includes the
+      # new JSON. If sync was a no-op, this is just main.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run build
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh workflow run deploy.yml --ref main
+          VITE_BASE: /${{ github.event.repository.name }}/
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+      - id: deployment
+        uses: actions/deploy-pages@v4
 ```
 
 - [ ] **Step 2: Sanity check YAML syntax**
@@ -1755,11 +1821,16 @@ This script is run **once** by the developer to create the initial Sheets workbo
 """One-shot: populate a fresh Google Sheets workbook from web/src/data/*.json.
 
 Usage:
-  python scripts/bootstrap_sheets.py --sheet-id <id> --credentials <path>
+  python scripts/bootstrap_sheets.py \\
+    --sheet-id <id> --credentials <path> --dev-email <your-google-email>
 
 Pre-conditions:
   - A blank Google Sheets workbook exists.
-  - The service account at <path> has Editor access to the sheet.
+  - The service account at <path> has Editor access to the sheet
+    (Viewer is NOT enough — script creates/deletes tabs and runs batchUpdate).
+  - <your-google-email> is the human account that should be allowed to edit
+    protected ranges. Without this, you will be blocked from editing
+    locked cells alongside the data collector.
 """
 import argparse
 import json
@@ -1838,6 +1909,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sheet-id", required=True)
     ap.add_argument("--credentials", required=True)
+    ap.add_argument("--dev-email", required=True,
+                    help="Google account email allowed to edit locked ranges. "
+                         "Data collector edits are blocked by editors-allowlist.")
     ap.add_argument("--data-dir", default="web/src/data")
     args = ap.parse_args()
 
@@ -1877,15 +1951,16 @@ def main():
         chart_gid[c["id"]] = ws.id  # gspread Worksheet.id == Sheets gid
 
     # 5) Create INDEX tab with HYPERLINKs that target each tab's real gid.
-    index_rows = [["Chart ID", "Section", "Title TH", "Title EN", "# years", "# series", "Jump"]]
+    # Spec round 4: # years / # series columns dropped — they would go stale
+    # because INDEX is bootstrap-static (service account is Viewer at runtime).
+    index_rows = [["Chart ID", "Section", "Title TH", "Title EN", "Jump"]]
     for c in charts:
         gid = chart_gid[c["id"]]
         index_rows.append([
             c["id"], c["section"], c["title"]["th"], c["title"]["en"],
-            len(c["categories_buddhist"]), len(c["series"]),
             f'=HYPERLINK("#gid={gid}","→ {tab_name(c)}")',
         ])
-    ws = sh.add_worksheet(title="📋 INDEX", rows=30, cols=8)
+    ws = sh.add_worksheet(title="📋 INDEX", rows=30, cols=6)
     ws.update("A1", index_rows, value_input_option="USER_ENTERED")
     # Move INDEX to first position
     sh.reorder_worksheets([ws] + [w for w in sh.worksheets() if w.id != ws.id])
@@ -1894,11 +1969,11 @@ def main():
     sh.del_worksheet(default_ws)
 
     # 7) Apply protections + data validation + conditional formatting in
-    #    one batchUpdate per chart tab. This addresses Codex finding #7:
-    #    bootstrap promises guardrails — deliver them programmatically
-    #    instead of leaving them as manual follow-ups.
-    _apply_chart_tab_guardrails(sh, charts, chart_gid)
-    _apply_style_tab_protections(sh)
+    #    one batchUpdate per chart tab. Hard protection (editors-allowlist)
+    #    not warning-only — the data collector is a workbook Editor, so
+    #    warningOnly wouldn't block them.
+    _apply_chart_tab_guardrails(sh, charts, chart_gid, [args.dev_email])
+    _apply_style_tab_protections(sh, [args.dev_email])
 
     print(f"Bootstrap complete: {len(charts) + 3} tabs created (INDEX + 2 STYLE + {len(charts)} charts).")
     print("Protections, data validation, and conditional formatting applied programmatically.")
@@ -1907,26 +1982,38 @@ def main():
     print("  - Format → Conditional formatting → delete all rules")
 
 
-def _apply_chart_tab_guardrails(sh, charts, chart_gid):
-    """For every chart tab: protect locked rows (1, 13, 14), add year-range
-    data validation on column A from row 18, add 'numeric or empty' rule on
-    value columns, add conditional formatting for duplicate years."""
+REQUIRED_TEXT_ROWS = (2, 3, 4, 5, 7, 8, 9, 10)  # 0-indexed for rows 3-6 + 8-11
+PINK = {"red": 0.99, "green": 0.85, "blue": 0.85}
+
+
+def _apply_chart_tab_guardrails(sh, charts, chart_gid, allowed_editors):
+    """For every chart tab:
+    - HARD protect rows 1 (chart_id), 13 (table divider), 14 (series_key)
+      with editors-allowlist (warningOnly would NOT block workbook editors)
+    - Data validation: year column A from row 18 = integer 2500-2700
+    - Data validation: value columns from row 18 = numeric OR empty
+    - Conditional format: highlight duplicate year rows
+    - Conditional format: highlight blank required-text cells (rows 3-6, 8-11)
+    """
     requests = []
     for c in charts:
         gid = chart_gid[c["id"]]
         num_series = len(c["series"])
-        # Protect rows 1, 13, 14 (0-indexed: 0, 12, 13) across the whole tab width
+
+        # Hard-protect rows 1, 13, 14 (0-indexed: 0, 12, 13) with allowlist
         for r in (0, 12, 13):
             requests.append({
                 "addProtectedRange": {
                     "protectedRange": {
                         "range": {"sheetId": gid, "startRowIndex": r, "endRowIndex": r + 1},
-                        "description": "Locked — do not edit",
-                        "warningOnly": True,  # warning, not hard block, to keep dev's life easier
+                        "description": "Locked — only dev can edit",
+                        "editors": {"users": allowed_editors},
+                        # NOTE: omit warningOnly → defaults to hard protection
                     }
                 }
             })
-        # Year column (A) from row 18 onward — must be integer 2500-2700
+
+        # Year column (A) from row 18 onward
         requests.append({
             "setDataValidation": {
                 "range": {"sheetId": gid, "startRowIndex": 17, "startColumnIndex": 0, "endColumnIndex": 1},
@@ -1939,7 +2026,7 @@ def _apply_chart_tab_guardrails(sh, charts, chart_gid):
                 }
             }
         })
-        # Value columns from row 18 — numeric OR blank (intentional null)
+        # Value columns from row 18 — numeric OR blank
         requests.append({
             "setDataValidation": {
                 "range": {"sheetId": gid, "startRowIndex": 17,
@@ -1952,7 +2039,7 @@ def _apply_chart_tab_guardrails(sh, charts, chart_gid):
                 }
             }
         })
-        # Conditional format: highlight duplicate year rows red
+        # Conditional format: duplicate year rows
         requests.append({
             "addConditionalFormatRule": {
                 "rule": {
@@ -1960,18 +2047,35 @@ def _apply_chart_tab_guardrails(sh, charts, chart_gid):
                     "booleanRule": {
                         "condition": {"type": "CUSTOM_FORMULA",
                                       "values": [{"userEnteredValue": "=COUNTIF(A:A,A18)>1"}]},
-                        "format": {"backgroundColor": {"red": 0.99, "green": 0.85, "blue": 0.85}},
+                        "format": {"backgroundColor": PINK},
                     }
                 },
                 "index": 0,
             }
         })
+        # Conditional format: required-text fields must not be blank.
+        # Each row 3-6 and 8-11 needs B<row> non-empty.
+        for r0 in REQUIRED_TEXT_ROWS:
+            requests.append({
+                "addConditionalFormatRule": {
+                    "rule": {
+                        "ranges": [{"sheetId": gid,
+                                    "startRowIndex": r0, "endRowIndex": r0 + 1,
+                                    "startColumnIndex": 1, "endColumnIndex": 2}],
+                        "booleanRule": {
+                            "condition": {"type": "BLANK"},
+                            "format": {"backgroundColor": PINK},
+                        }
+                    },
+                    "index": 0,
+                }
+            })
     if requests:
         sh.batch_update({"requests": requests})
 
 
-def _apply_style_tab_protections(sh):
-    """Protect the entire STYLE-charts and STYLE-series tabs."""
+def _apply_style_tab_protections(sh, allowed_editors):
+    """Hard-protect the entire STYLE-charts and STYLE-series tabs."""
     requests = []
     for ws in sh.worksheets():
         if ws.title.startswith("🎨 STYLE"):
@@ -1980,7 +2084,7 @@ def _apply_style_tab_protections(sh):
                     "protectedRange": {
                         "range": {"sheetId": ws.id},
                         "description": "STYLE tab — dev-only",
-                        "warningOnly": True,
+                        "editors": {"users": allowed_editors},
                     }
                 }
             })
@@ -2005,7 +2109,7 @@ SAMPLE = {
     "title": {"th": "x", "en": "y"}, "subtitle": {"th": "x", "en": "y"},
     "categories_buddhist": ["2566", "2567"],
     "series": [
-        {"key": "bachelor", "name": {"th": "ป.ตรี", "en": "B"}, "color": "#000", "values": [1, 2]},
+        {"key": "bachelor", "name": {"th": "ป.ตรี", "en": "B"}, "color": "#000000", "values": [1, 2]},
         {"key": "total", "name": {"th": "รวม", "en": "T"}, "color": "#fff", "values": [3, 4], "emphasis": True},
     ],
     "methodology": {"th": "x", "en": "y"},
@@ -2132,25 +2236,42 @@ Content (numbered to match spec Initial Migration steps 0–5):
    should return nothing).
 2. Create empty Google Sheets workbook → note Sheet ID.
 3. Create GCP project + service account + JSON key. Share the Sheets file
-   with the service account email — **Viewer role** (the script only reads).
-4. Generate fine-grained GitHub PAT — **Contents: write, Actions: write**
-   (Contents: read is NOT enough; `repository_dispatch` requires write).
+   with the service account email — **Editor role initially** (bootstrap
+   needs write access for batchUpdate). Also share with the data collector
+   (Editor) and any dev maintainers (Editor).
+4. Generate fine-grained GitHub PAT — **Contents: write, Actions: read**.
+   (Contents: read is NOT enough; `repository_dispatch` requires write.
+   Actions: read is needed for the Apps Script to poll workflow runs.)
 5. Add GitHub Secret `GOOGLE_SERVICE_ACCOUNT_JSON`.
-6. Run `python scripts/bootstrap_sheets.py --sheet-id <id> --credentials <path>`.
-7. Open Sheet → Extensions → Apps Script → paste BOTH `apps_script/Code.gs`
+6. Run `python scripts/bootstrap_sheets.py --sheet-id <id> --credentials <path> --dev-email <your-google-account>`.
+   The `--dev-email` is the Google account that should be allowed to edit
+   protected ranges (rows 1, 13, 14 and the STYLE tabs). Without this you
+   yourself will be blocked from editing those cells.
+7. **(Optional hardening)** Downgrade service account from Editor to
+   Viewer in Sheets share dialog. Future bootstrap re-runs need Editor
+   restored temporarily.
+8. Open Sheet → Extensions → Apps Script → paste BOTH `apps_script/Code.gs`
    AND `apps_script/PublishModal.html`.
-8. Set Script Properties: `GITHUB_PAT`, `SHEET_ID`, `REPO` (e.g. `org/repo`),
+9. Set Script Properties: `GITHUB_PAT`, `SHEET_ID`, `REPO` (e.g. `org/repo`),
    `HELP_URL` (link to the published Thai guide).
-9. Reload Sheet, verify `📤 Publish to Dashboard` menu appears.
-10. Run "Check what will change (dry-run)" — expect "no changes" (data
+10. Reload Sheet, verify `📤 Publish to Dashboard` menu appears.
+11. Run "Check what will change (dry-run)" — expect "no changes" (data
     matches JSON because of Phase 0.5).
-11. Edit one cell, dry-run again — expect 1 file diff.
-12. Click "Publish all changes" — verify: commit on `main`, sync workflow
-    success, **deploy.yml triggered** (verify in Actions tab), and dashboard
-    actually updates on GitHub Pages.
-13. Read through the credential-trust-boundary section of the spec and
+12. Edit one cell, dry-run again — expect 1 file diff.
+13. Click "Publish all changes" — verify: sync job commits, deploy job
+    runs (inline in same workflow run), modal reports success only AFTER
+    deploy finishes, dashboard updates on GitHub Pages.
+14. **Test recovery:** click Publish a second time with no edits. Expected:
+    sync no-op (no commit), deploy job still runs, dashboard re-publishes
+    identically, modal reports success. This proves the "repo updated but
+    Pages stuck" scenario is recoverable.
+15. **Test hard protection:** as a non-dev Google account (or in an
+    incognito Sheets session as the data collector), try to edit a cell in
+    row 14 of any chart tab. Expected: "You don't have permission" error
+    (NOT a warning with an OK button).
+16. Read through the credential-trust-boundary section of the spec and
     confirm you accept it.
-14. Hand the Sheet URL and the Thai guide URL to the data collector.
+17. Hand the Sheet URL and the Thai guide URL to the data collector.
 
 - [ ] **Step 2: Commit**
 
