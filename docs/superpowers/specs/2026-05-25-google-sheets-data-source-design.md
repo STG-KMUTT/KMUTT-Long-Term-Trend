@@ -414,6 +414,11 @@ for tab_name, data in parsed_charts.items():
         errors.append(f"{tab_name}: duplicate years")
     if years != sorted(years):
         errors.append(f"{tab_name}: years not sorted ascending")
+    series_keys = [s["key"] for s in data["series"]]
+    if any(not k.strip() for k in series_keys):
+        errors.append(f"{tab_name}: empty series_key cell in row 14")
+    if len(set(series_keys)) != len(series_keys):
+        errors.append(f"{tab_name}: duplicate series_key in row 14")
     for s in data["series"]:
         if (cid, s["key"]) not in STYLE_SERIES:
             errors.append(f"{tab_name}: series '{s['key']}' missing from STYLE-series")
@@ -507,6 +512,12 @@ After step 5, hand off to the data collector with `docs/data-collector-guide-th.
   artefact unused by the React app (confirmed: no reference in
   `web/src/{App,Chart,ChartCard,KpiCard}.tsx`). Implementation plan must
   also remove `slide: number` from `web/src/types.ts`.
+- **`subtitle` becomes required** (was `Bilingual | null` in types.ts). All
+  20 current JSON files already have a non-null subtitle, so this is a
+  no-op for the data but tightens the contract. Implementation plan must
+  also change `subtitle: Bilingual | null` to `subtitle: Bilingual` in
+  `web/src/types.ts` and verify `Chart.tsx`/`ChartCard.tsx` no longer
+  branch on null.
 - **STYLE tab is split** into STYLE-charts (per chart) and STYLE-series (per
   chart × series) to eliminate the duplicate-section problem flagged in
   review.
