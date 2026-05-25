@@ -1,0 +1,38 @@
+{
+  "id": "research-per-academic-3yr",
+  "slide": 15,
+  "section": "research",
+  "chart_type": "line",
+  "title": {
+    "th": "ทุนวิจัยต่อบุคลากรสายวิชาการ เฉลี่ยทุก 3 ปี",
+    "en": "Research Funding per Academic Staff (3-Year Avg)"
+  },
+  "subtitle": {
+    "th": "เฉพาะอาจารย์และนักวิจัย (ล้านบาทต่อคน)",
+    "en": "Faculty and researchers only (million baht per person)"
+  },
+  "categories_buddhist": [
+    "2539-2541","2542-2544","2545-2547","2548-2550","2551-2553",
+    "2554-2556","2557-2559","2560-2562","2563-2565","2566-2568"
+  ],
+  "series": [
+    {
+      "key": "per_academic",
+      "name": {
+        "th": "ทุนวิจัยต่อบุคลากรสายวิชาการ",
+        "en": "Funding per academic staff"
+      },
+      "color": "#f29400",
+      "values": [0.102,0.153,0.262,0.334,0.261,0.333,0.308,0.522,0.454,0.608],
+      "emphasis": true
+    }
+  ],
+  "methodology": {
+    "th": "เฉพาะอาจารย์/นักวิจัย ใช้นิยามเดียวกับสไลด์ 13 ตัวเลขแสดงความเข้มข้นของทุนวิจัยต่อบุคลากรในส่วนสายวิชาการ",
+    "en": "Limited to faculty/researchers. Same definitions as slide 13. Shows research funding intensity per academic staff member."
+  },
+  "source": {
+    "th": "หนังสือรายงานประจำปี มจธ., กลุ่มงานวิจัยสถาบันและสารสนเทศ + ศูนย์ส่งเสริมงานวิจัยและทรัพย์สินทางปัญญา สวท.",
+    "en": "KMUTT Annual Reports, Institutional Research & Information Unit + Research & IP Promotion Center"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "research-per-staff-3yr",
+  "slide": 14,
+  "section": "research",
+  "chart_type": "line",
+  "title": {
+    "th": "ทุนวิจัยเฉลี่ยต่อบุคลากร เฉลี่ยทุก 3 ปี",
+    "en": "Research Funding per Staff (3-Year Average)"
+  },
+  "subtitle": {
+    "th": "ล้านบาทต่อคน · ค่าเฉลี่ยรอบสามปีเพื่อตัดสัญญาณรบกวน",
+    "en": "Million baht per person — 3-year average to smooth noise"
+  },
+  "categories_buddhist": [
+    "2536-2538","2539-2541","2542-2544","2545-2547","2548-2550",
+    "2551-2553","2554-2556","2557-2559","2560-2562","2563-2565","2566-2568"
+  ],
+  "series": [
+    {
+      "key": "per_research_eligible",
+      "name": { "th": "ต่อบุคลากรเพื่อการวิจัย", "en": "Per research-eligible staff" },
+      "color": "#f29400",
+      "values": [0.085,0.103,0.153,0.260,0.339,0.261,0.333,0.308,0.522,0.454,0.610]
+    },
+    {
+      "key": "per_active_researcher",
+      "name": { "th": "ต่อบุคลากรที่ทำงานวิจัย", "en": "Per active researcher" },
+      "color": "#1e6091",
+      "values": [0.360,0.340,0.300,0.387,0.548,0.655,0.648,0.617,0.882,1.065,1.212],
+      "emphasis": true
+    }
+  ],
+  "methodology": {
+    "th": "ค่าเฉลี่ยรายปีในกลุ่มทุก 3 ปี ตั้งแต่ปี 2559 ใช้นิยามใหม่ (ดูสไลด์ 13)",
+    "en": "Mean annual value within each 3-year bucket. Definitions revised from 2016 (see slide 13)."
+  },
+  "source": {
+    "th": "หนังสือรายงานประจำปี 2550-2568, กลุ่มงานวิจัยสถาบันและสารสนเทศ สำนักงานยุทธศาสตร์",
+    "en": "Annual Reports 2007-2025, Institutional Research & Information Unit, Strategy Office"
+  }
+}

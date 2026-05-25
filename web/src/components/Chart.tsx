@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
-import ReactECharts from 'echarts-for-react'
-import type { EChartsOption, LineSeriesOption, BarSeriesOption } from 'echarts'
+import { useEffect, useMemo, useRef } from 'react'
+import * as echarts from 'echarts'
+import type { EChartsOption, LineSeriesOption, BarSeriesOption, ECharts } from 'echarts'
 import type { ChartData, Lang } from '../types'
 import { useLang } from '../i18n'
 
@@ -27,6 +27,8 @@ function fmt(n: number | null | undefined): string {
 
 export function Chart({ data, height = 380 }: Props) {
   const { lang } = useLang()
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const instanceRef = useRef<ECharts | null>(null)
 
   const option = useMemo<EChartsOption>(() => {
     const cats = data.categories_buddhist.map(c => yearLabel(c, lang))
@@ -169,13 +171,27 @@ export function Chart({ data, height = 380 }: Props) {
     return opt
   }, [data, lang])
 
-  return (
-    <ReactECharts
-      option={option}
-      style={{ height, width: '100%' }}
-      notMerge={true}
-      lazyUpdate={false}
-      opts={{ renderer: 'canvas' }}
-    />
-  )
+  // Init + dispose ECharts on mount/unmount. echarts-for-react@3 broke against
+  // ECharts@6 + React@19 (instance is created but setOption is never called),
+  // so we drive echarts directly. The wrapper has explicit width/height before
+  // init so the canvas is sized correctly on first paint.
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const inst = echarts.init(el, undefined, { renderer: 'canvas' })
+    instanceRef.current = inst
+    const ro = new ResizeObserver(() => inst.resize())
+    ro.observe(el)
+    return () => {
+      ro.disconnect()
+      inst.dispose()
+      instanceRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    instanceRef.current?.setOption(option, true)
+  }, [option])
+
+  return <div ref={containerRef} style={{ width: '100%', height }} />
 }

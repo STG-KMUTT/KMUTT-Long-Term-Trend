@@ -1,0 +1,51 @@
+{
+  "id": "programs",
+  "slide": 2,
+  "section": "education",
+  "chart_type": "stacked-bar",
+  "title": {
+    "th": "จำนวนสาขาวิชาที่เปิดสอน",
+    "en": "Programs Offered"
+  },
+  "subtitle": {
+    "th": "จำแนกตามลักษณะหลักสูตร (รวมทุกระดับการศึกษา)",
+    "en": "By program type (all levels combined)"
+  },
+  "categories_buddhist": [
+    "2559", "2560", "2561", "2562", "2563", "2564", "2565", "2566", "2567", "2568"
+  ],
+  "series": [
+    {
+      "key": "thai",
+      "name": { "th": "หลักสูตรภาษาไทย", "en": "Thai programs" },
+      "color": "#f29400",
+      "values": [110, 109, 111, 112, 112, 112, 103, 104, 102, 103]
+    },
+    {
+      "key": "international",
+      "name": { "th": "หลักสูตรนานาชาติ", "en": "International programs" },
+      "color": "#1e6091",
+      "values": [34, 34, 34, 34, 38, 41, 41, 41, 45, 45]
+    },
+    {
+      "key": "english",
+      "name": { "th": "หลักสูตรภาษาอังกฤษ", "en": "English programs" },
+      "color": "#10b981",
+      "values": [3, 3, 4, 4, 4, 6, 6, 5, 5, 5]
+    },
+    {
+      "key": "bilingual",
+      "name": { "th": "หลักสูตรสองภาษา", "en": "Bilingual programs" },
+      "color": "#8b5cf6",
+      "values": [4, 1, 1, 1, 1, 1, null, 1, 1, 1]
+    }
+  ],
+  "methodology": {
+    "th": "แสดงจำนวนสาขาวิชารวมทุกระดับการศึกษา (ป.ตรี + ป.โท + ป.เอก) ณ ปีการศึกษานั้น ๆ ในปี 2568 สัดส่วน: ไทย 67% นานาชาติ 29% อังกฤษ 3% สองภาษา 1%",
+    "en": "Total number of programs across all levels (Bachelor's + Master's + Ph.D.) in each academic year. 2025 share: Thai 67%, International 29%, English 3%, Bilingual 1%."
+  },
+  "source": {
+    "th": "หนังสือสารสนเทศ ปีการศึกษา 2559-2568, กลุ่มงานวิจัยสถาบันและสารสนเทศ สำนักงานยุทธศาสตร์ มจธ.",
+    "en": "Information Books 2016-2025, Institutional Research & Information Unit, Strategy Office, KMUTT"
+  }
+}

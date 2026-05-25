@@ -48,8 +48,8 @@ export const UI = {
                     en: 'Institutional data 1993-2025' },
   org_unit:       { th: 'กลุ่มงานวิจัยสถาบันและสารสนเทศ สำนักงานยุทธศาสตร์',
                     en: 'Institutional Research & Information Unit, Strategy Office' },
-  prototype_note: { th: 'Prototype — แสดง 3 กราฟตัวอย่าง (จาก 22)',
-                    en: 'Prototype — 3 sample charts (of 22)' },
+  prototype_note: { th: 'Prototype — แสดง 20 กราฟ จากสไลด์ต้นฉบับ 22 หน้า',
+                    en: 'Prototype — 20 charts drawn from a 22-slide source deck' },
   section: {
     education: { th: 'การศึกษา',  en: 'Education' },
     personnel: { th: 'บุคลากร',    en: 'Personnel' },
@@ -69,6 +69,11 @@ export const UI = {
   hide_methodology: { th: 'ซ่อนหมายเหตุ', en: 'Hide methodology' },
   unit_people:    { th: 'คน', en: 'people' },
   unit_items:     { th: 'รายการ', en: 'items' },
+  unit_programs:  { th: 'สาขา', en: 'programs' },
+  unit_percent:   { th: '%', en: '%' },
+  unit_million_baht: { th: 'ล้านบาท', en: 'M฿' },
+  unit_million_per_person: { th: 'ลบ./คน', en: 'M฿/person' },
+  unit_papers_per_person: { th: 'บทความ/คน', en: 'papers/person' },
 } as const
 
 export function t(key: keyof typeof UI, lang: Lang): string {

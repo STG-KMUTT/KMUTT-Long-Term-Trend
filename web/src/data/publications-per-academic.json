@@ -1,0 +1,43 @@
+{
+  "id": "publications-per-academic",
+  "slide": 18,
+  "section": "research",
+  "chart_type": "clustered-bar",
+  "title": {
+    "th": "บทความวิจัยและสัดส่วนต่อบุคลากรสายวิชาการ",
+    "en": "Publications and Productivity per Academic Staff"
+  },
+  "subtitle": {
+    "th": "แท่ง: จำนวนบทความ · เส้น: ค่าเฉลี่ยต่ออาจารย์/นักวิจัย",
+    "en": "Bars: total publications · Line: per academic staff member"
+  },
+  "categories_buddhist": [
+    "2540","2541","2542","2543","2544","2545","2546","2547","2548","2549",
+    "2550","2551","2552","2553","2554","2555","2556","2557","2558","2559",
+    "2560","2561","2562","2563","2564","2565","2566","2567","2568"
+  ],
+  "series": [
+    {
+      "key": "publications",
+      "name": { "th": "จำนวนบทความวิจัย", "en": "Publications (count)" },
+      "color": "#1e6091",
+      "values": [177,245,322,281,350,643,796,810,968,1295,1356,1466,1104,1165,1165,1183,1128,1379,1280,1446,1071,1020,1205,1266,1364,1335,1263,1407,1105]
+    },
+    {
+      "key": "per_academic",
+      "name": { "th": "บทความต่อบุคลากรสายวิชาการ", "en": "Publications per academic staff" },
+      "color": "#f29400",
+      "values": [0.38,0.51,0.63,0.54,0.65,1.17,1.42,1.40,1.62,1.88,1.91,1.94,1.36,1.43,1.34,1.38,1.26,1.57,1.44,1.59,1.20,1.16,1.32,1.42,1.53,1.49,1.41,1.57,1.24],
+      "is_cumulative": true,
+      "emphasis": true
+    }
+  ],
+  "methodology": {
+    "th": "แท่ง (แกนซ้าย) = จำนวนบทความวิจัยทั้งหมด · เส้น (แกนขวา) = อัตราส่วนต่อบุคลากรสายวิชาการ (อาจารย์+นักวิจัย) ในปีเดียวกัน · ค่าเฉลี่ยช่วงที่ผลิตภาพสูงสุดอยู่ที่ ~1.9 บทความ/คน (ราวปี 2550-2551)",
+    "en": "Bars (left axis) = total publication count. Line (right axis) = ratio per academic staff (faculty + researchers) in the same year. Peak productivity around ~1.9 publications/person (circa 2007-2008)."
+  },
+  "source": {
+    "th": "หนังสือรายงานประจำปี มจธ. + ศูนย์ส่งเสริมงานวิจัยและทรัพย์สินทางปัญญา สวท.",
+    "en": "KMUTT Annual Reports + Research & IP Promotion Center"
+  }
+}
