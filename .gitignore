@@ -30,3 +30,6 @@ __pycache__/
 # intermediate data
 *.raw.json
 slides_full.txt
+
+# worktrees (superpowers isolated workspaces)
+.worktrees/
