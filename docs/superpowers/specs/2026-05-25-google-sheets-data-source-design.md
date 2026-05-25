@@ -588,8 +588,11 @@ if errors:
   not fail.
 - **Edits to STYLE** → tab is cell-protected. If protection is bypassed (only
   possible by the dev), changes appear in the next `git diff` for review.
-- **Sheets API quota / timeout** → Apps Script retries the dispatch 3 times,
-  then surfaces a clear error in the modal.
+- **Sheets API quota / timeout** → The Apps Script dispatch is a single
+  POST to GitHub (not retried — a failed dispatch surfaces immediately
+  in the modal). The poll loop in the modal does retry transient
+  `GET /actions/runs` failures (re-tries on the next 5-second tick until
+  the 5-minute window expires).
 
 ## Authentication
 
@@ -766,8 +769,10 @@ After step 5, hand off to the data collector with `docs/data-collector-guide-th.
   files changed. This gives the data collector a recovery path for the
   "repo updated but Pages stale" stuck state — just click Publish again.
 - **PAT scope corrected from `Actions: write` to `Actions: read`.** The
-  Apps Script no longer dispatches anything; it only polls runs and
-  downloads artifacts.
+  Apps Script no longer dispatches the deploy workflow (deploy is inlined
+  as a job in the sync workflow). It still dispatches `repository_dispatch`
+  for the sync workflow itself — that's a Contents-write operation, not
+  Actions. Poll + artifact download only needs `Actions: read`.
 - **Service account starts as Editor** (bootstrap requires it). Optional
   step 2b in Initial Migration downgrades to Viewer after bootstrap.
 - **Protected ranges use editors-allowlist, not warningOnly.** With the
@@ -788,6 +793,30 @@ After step 5, hand off to the data collector with `docs/data-collector-guide-th.
 - **Test fixture color fixed** from `#000` to `#000000` so
   `test_valid_chart_produces_no_errors` actually passes the hex-format
   validator added in round 3.
+
+## Resolved decisions (round 5 — Codex external review)
+
+- **Parser hard-fails on blank year with data.** Previously, a row with a
+  blank cell A but values in B+ was silently dropped — the dashboard would
+  publish missing data for that year with no warning. Now the parser raises
+  `ValueError("year cell is blank but value columns are not")`, which the
+  orchestrator catches as a parse_error and fails the publish.
+- **Deploy job uses `concurrency.group: pages`** to share serialization
+  with the existing `deploy.yml`. Without this, a sync-triggered deploy
+  could race a manual/push-triggered deploy and either one could overwrite
+  the dashboard with a stale artifact while the modal already shows
+  success.
+- **Bootstrap is properly idempotent.** A new `_reset_workbook_state`
+  helper drops all existing protected ranges and conditional format rules
+  via `batchUpdate` before tab deletion. Tab deletion uses a temporary
+  placeholder tab to avoid Sheets' "cannot delete the last sheet" rule.
+  Re-runs are now explicitly supported (the runbook says how).
+- **Stale doc text cleaned up:** the "deploy.yml deploys after sync" line
+  in the plan header now reflects the inline deploy job; the manual
+  follow-ups note on the bootstrap is gone; the "Apps Script no longer
+  dispatches anything" phrasing is corrected (it still dispatches the
+  sync workflow); the obsolete "retries the dispatch 3 times" line is
+  replaced by accurate poll-retry behaviour.
 
 ## Effort Estimate
 

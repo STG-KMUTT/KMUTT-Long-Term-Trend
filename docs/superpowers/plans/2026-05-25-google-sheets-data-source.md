@@ -4,7 +4,7 @@
 
 **Goal:** Replace the PPTX-based JSON generator with a Google Sheets-driven flow, so the Strategy Office data collector can update the 20 dashboard charts end-to-end via a "Publish" button — no Git or CLI required.
 
-**Architecture:** Google Sheets workbook (one tab per chart) is the source of truth. An Apps Script "📤 Publish" menu triggers a GitHub Action via `repository_dispatch`. The action runs a Python script that reads the Sheet via the Sheets API, validates, writes `web/src/data/*.json`, and commits — the existing `deploy.yml` then deploys.
+**Architecture:** Google Sheets workbook (one tab per chart) is the source of truth. An Apps Script "📤 Publish" menu triggers a GitHub Action via `repository_dispatch`. The action runs a Python script that reads the Sheet via the Sheets API, validates, writes `web/src/data/*.json`, commits — then an inline deploy job (same workflow run) builds the React app and publishes to GitHub Pages. The standalone `deploy.yml` is preserved for manual deploys and non-sync pushes.
 
 **Tech Stack:** Python 3.11+, pytest, gspread, google-auth, Google Apps Script, GitHub Actions, TypeScript (React app unchanged except small type fix).
 
@@ -552,6 +552,33 @@ def test_parse_chart_tab_preserves_blank_series_key_position():
     assert result["series"][0]["values"] == [11541, 11731, 11905, 12084, 12253]
     # The blank-key series still carries its column's data — validator will reject it
     assert result["series"][1]["values"] == [2930, 2751, 2577, 2566, 2472]
+
+def test_parse_chart_tab_rejects_blank_year_with_data():
+    """Critical: blanking the year cell while data remains in B+ must raise,
+    not silently drop the row (which would erase a year's data from the
+    dashboard without any warning)."""
+    rows = load("students-all-rows.json")
+    # Blank the year cell for 2566 (0-idx 19, column A) but leave bachelor/etc intact
+    rows[19][0] = ""
+    style_charts = parse_style_charts(load("style-charts-rows.json"))
+    style_series = parse_style_series(load("style-series-rows.json"))
+
+    with pytest.raises(ValueError, match="year cell is blank but value columns are not"):
+        parse_chart_tab(rows, style_charts, style_series)
+
+def test_parse_chart_tab_skips_completely_blank_rows():
+    """A row that is entirely blank (year + every value cell) is skipped
+    silently — this is normal and lets the data collector leave trailing
+    blank rows in the sheet."""
+    rows = load("students-all-rows.json")
+    # Wipe the entire last row (2568 + all values)
+    rows[21] = ["", "", "", ""]
+    style_charts = parse_style_charts(load("style-charts-rows.json"))
+    style_series = parse_style_series(load("style-series-rows.json"))
+
+    result = parse_chart_tab(rows, style_charts, style_series)
+    # Only 4 years now (2564, 2565, 2566, 2567)
+    assert result["categories_buddhist"] == ["2564", "2565", "2566", "2567"]
 ```
 
 - [ ] **Step 2: Verify tests fail**
@@ -612,16 +639,36 @@ def parse_chart_tab(
     names_th = [at(raw_names_th, i) for i in range(width)]
     names_en = [at(raw_names_en, i) for i in range(width)]
 
-    # Data table from row 17 onward (0-indexed)
+    # Data table from row 17 onward (0-indexed).
+    #
+    # Skipping rule: only skip rows that are ENTIRELY blank (year + every
+    # value column). If the year cell is blank but any data cell has a
+    # value, that's a corrupted row — the data collector likely deleted
+    # the year but forgot the data. Raising forces a validation error
+    # rather than silently losing the whole row's data.
     years: list[str] = []
     values_by_col: list[list[float | None]] = [[] for _ in range(width)]
-    for row in rows[DATA_START_ROW:]:
-        if not row or not row[0].strip():
+    for row_idx, row in enumerate(rows[DATA_START_ROW:], start=DATA_START_ROW):
+        if not row:
             continue
-        years.append(row[0].strip())
+        year_cell = row[0].strip() if len(row) > 0 and isinstance(row[0], str) else str(row[0] or "").strip()
+        data_cells = []
         for i in range(width):
-            cell_val = row[i + 1] if len(row) > i + 1 else ""
-            cell_val = cell_val.strip() if isinstance(cell_val, str) else cell_val
+            v = row[i + 1] if len(row) > i + 1 else ""
+            v = v.strip() if isinstance(v, str) else v
+            data_cells.append(v)
+        any_data = any(c not in ("", None) for c in data_cells)
+        if not year_cell:
+            if any_data:
+                # Sheet row number = row_idx + 1 (Sheets is 1-indexed)
+                raise ValueError(
+                    f"row {row_idx + 1}: year cell is blank but value columns are not — "
+                    f"refusing to silently drop the row"
+                )
+            continue  # truly empty row, ignore
+        years.append(year_cell)
+        for i in range(width):
+            cell_val = data_cells[i]
             if cell_val == "" or cell_val is None:
                 values_by_col[i].append(None)
             else:
@@ -1179,11 +1226,22 @@ from scripts.sync_from_sheets import run_sync
 FIX = Path(__file__).parent / "fixtures"
 
 def make_fake_client():
+    """Orchestrator test client: declares ONLY students-all in STYLE-charts.
+
+    The shared style-charts-rows.json fixture also lists 'patents' for
+    parser/validator tests, but the orchestrator test only provides a
+    students-all chart tab — using the full fixture would (correctly)
+    trigger the validator's 'missing chart tab for patents' cross-check
+    and fail every happy-path test."""
     client = MagicMock()
     client.get_chart_tabs.return_value = {
         "EDU-students-all": json.loads((FIX / "students-all-rows.json").read_text(encoding="utf-8"))
     }
-    client.get_style_charts.return_value = json.loads((FIX / "style-charts-rows.json").read_text(encoding="utf-8"))
+    client.get_style_charts.return_value = [
+        ["chart_id", "section", "chart_type"],
+        ["students-all", "education", "line"],
+    ]
+    # style-series fixture already only has students-all entries
     client.get_style_series.return_value = json.loads((FIX / "style-series-rows.json").read_text(encoding="utf-8"))
     return client
 
@@ -1440,6 +1498,15 @@ jobs:
     needs: sync
     if: success() && github.event.client_payload.dry_run != true
     runs-on: ubuntu-latest
+    # MUST share the 'pages' concurrency group with the existing deploy.yml
+    # so a sync-triggered deploy can't race a manual deploy or push-triggered
+    # deploy and overwrite the dashboard with a stale artifact. Workflow-
+    # level group 'sync-from-sheets' already serializes sync runs; this
+    # job-level group also serializes ALL Pages deployments across both
+    # workflows.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -1923,10 +1990,19 @@ def main():
     charts = load_charts(Path(args.data_dir))
     print(f"Loaded {len(charts)} charts")
 
-    # 1) Wipe existing tabs except the default Sheet1; we'll delete it last.
-    default_ws = sh.sheet1
+    # 1) Reset to a clean slate. Bootstrap is idempotent: re-runs are
+    # supported. We:
+    #   a) Drop all existing protected ranges and conditional format rules
+    #      (otherwise leftover protections from a prior run will block
+    #      subsequent writes, even from the service account).
+    #   b) Create a temporary placeholder tab so we can delete every other
+    #      tab without hitting Sheets' "cannot delete the last sheet" rule.
+    #   c) Delete every tab except the placeholder.
+    #   d) At the end of the script, delete the placeholder.
+    _reset_workbook_state(sh)
+    placeholder = sh.add_worksheet(title="_bootstrap_placeholder", rows=1, cols=1)
     for ws in list(sh.worksheets()):
-        if ws.id != default_ws.id:
+        if ws.id != placeholder.id:
             sh.del_worksheet(ws)
 
     # 2) Create STYLE-charts tab
@@ -1965,8 +2041,8 @@ def main():
     # Move INDEX to first position
     sh.reorder_worksheets([ws] + [w for w in sh.worksheets() if w.id != ws.id])
 
-    # 6) Delete default Sheet1 (safe — 23 other tabs exist by now)
-    sh.del_worksheet(default_ws)
+    # 6) Delete the placeholder (safe — 23 other tabs exist by now)
+    sh.del_worksheet(placeholder)
 
     # 7) Apply protections + data validation + conditional formatting in
     #    one batchUpdate per chart tab. Hard protection (editors-allowlist)
@@ -1977,13 +2053,37 @@ def main():
 
     print(f"Bootstrap complete: {len(charts) + 3} tabs created (INDEX + 2 STYLE + {len(charts)} charts).")
     print("Protections, data validation, and conditional formatting applied programmatically.")
-    print("If you ever need to clear them (e.g. before re-running bootstrap), do it in the Sheets UI:")
-    print("  - Data → Protect ranges → delete all")
-    print("  - Format → Conditional formatting → delete all rules")
+    print("Re-runs are supported: this script drops existing protected ranges + conditional")
+    print("formats before rebuilding, so you can re-run safely as long as the service")
+    print("account still has Editor on the sheet.")
 
 
 REQUIRED_TEXT_ROWS = (2, 3, 4, 5, 7, 8, 9, 10)  # 0-indexed for rows 3-6 + 8-11
 PINK = {"red": 0.99, "green": 0.85, "blue": 0.85}
+
+
+def _reset_workbook_state(sh):
+    """Drop all protected ranges and conditional format rules in the
+    workbook. Run before deleting tabs so we don't fight stale rules
+    on a re-run.
+
+    Uses fetch_sheet_metadata() to enumerate existing rules. We delete
+    conditional format rules from highest index to 0 to avoid the index
+    shifting underneath us.
+    """
+    meta = sh.fetch_sheet_metadata()
+    requests = []
+    for sheet in meta.get("sheets", []):
+        gid = sheet["properties"]["sheetId"]
+        for pr in sheet.get("protectedRanges", []):
+            requests.append({"deleteProtectedRange":
+                {"protectedRangeId": pr["protectedRangeId"]}})
+        rules = sheet.get("conditionalFormats", [])
+        for i in range(len(rules) - 1, -1, -1):
+            requests.append({"deleteConditionalFormatRule":
+                {"sheetId": gid, "index": i}})
+    if requests:
+        sh.batch_update({"requests": requests})
 
 
 def _apply_chart_tab_guardrails(sh, charts, chart_gid, allowed_editors):
@@ -2096,7 +2196,13 @@ if __name__ == "__main__":
     main()
 ```
 
-> **Note for plan executor:** This bootstrap script does the bulk of the work (populating data, creating tabs, tab colours, freezing rows). The protection/validation/conditional-formatting steps are listed as manual follow-ups because they require either complex batchUpdate calls or are easier to set once in the Sheets UI. If implementer prefers full automation, those can be added via `sh.batch_update()` with `addProtectedRange` and `addConditionalFormatRule` requests — defer that to a follow-up task if time permits.
+> **Note for plan executor:** This bootstrap script handles everything
+> programmatically — populating data, creating tabs, tab colours, freezing
+> rows, AND all guardrails (hard-protected ranges with editors-allowlist,
+> data validation rules for year + value cells, conditional formatting for
+> duplicate years and required-text fields). Re-running is supported via
+> the `_reset_workbook_state` helper. No manual Sheets-UI follow-up is
+> required after a successful run.
 
 - [ ] **Step 2: Write minimal smoke test**
 
@@ -2248,8 +2354,12 @@ Content (numbered to match spec Initial Migration steps 0–5):
    protected ranges (rows 1, 13, 14 and the STYLE tabs). Without this you
    yourself will be blocked from editing those cells.
 7. **(Optional hardening)** Downgrade service account from Editor to
-   Viewer in Sheets share dialog. Future bootstrap re-runs need Editor
-   restored temporarily.
+   Viewer in Sheets share dialog.
+   - Future bootstrap re-runs require: restore service account to
+     Editor, then re-run `bootstrap_sheets.py`. The script is idempotent
+     — it drops existing protected ranges + conditional formats, deletes
+     all tabs, and rebuilds from scratch.
+   - After a successful re-run, downgrade back to Viewer.
 8. Open Sheet → Extensions → Apps Script → paste BOTH `apps_script/Code.gs`
    AND `apps_script/PublishModal.html`.
 9. Set Script Properties: `GITHUB_PAT`, `SHEET_ID`, `REPO` (e.g. `org/repo`),
