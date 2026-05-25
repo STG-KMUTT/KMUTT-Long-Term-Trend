@@ -19,11 +19,10 @@ export type ChartType = 'line' | 'stacked-bar' | 'clustered-bar'
 
 export interface ChartData {
   id: string
-  slide: number
   section: 'education' | 'personnel' | 'research' | 'finance'
   chart_type: ChartType
   title: Bilingual
-  subtitle: Bilingual | null
+  subtitle: Bilingual
   categories_buddhist: string[]
   series: ChartSeries[]
   methodology: Bilingual

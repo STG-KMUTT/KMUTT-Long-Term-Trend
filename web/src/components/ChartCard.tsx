@@ -19,9 +19,7 @@ export function ChartCard({ data, kpiSeriesKey, unitKey }: Props) {
         <h3 className="text-xl font-semibold text-slate-900">
           {data.title[lang]}
         </h3>
-        {data.subtitle && (
-          <p className="mt-1 text-sm text-slate-500">{data.subtitle[lang]}</p>
-        )}
+        <p className="mt-1 text-sm text-slate-500">{data.subtitle[lang]}</p>
       </header>
       <KpiCard data={data} seriesKey={kpiSeriesKey} unitKey={unitKey} />
       <Chart data={data} />
