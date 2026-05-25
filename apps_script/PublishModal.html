@@ -1,0 +1,118 @@
+<!-- apps_script/PublishModal.html -->
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<style>
+  body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; padding: 16px; color: #0f172a; }
+  #status { font-size: 14px; margin-bottom: 12px; min-height: 24px; }
+  ul { margin: 4px 0 12px 18px; padding: 0; }
+  li { margin-bottom: 4px; line-height: 1.4; }
+  .err-tab { font-weight: 600; margin-top: 12px; }
+  .err-field { color: #6b7280; font-family: monospace; font-size: 12px; }
+  .footer { margin-top: 16px; font-size: 12px; color: #475569; }
+  .footer a { color: #1e6091; }
+  .spinner { display: inline-block; width: 12px; height: 12px;
+             border: 2px solid #cbd5e1; border-top-color: #1e6091;
+             border-radius: 50%; animation: spin 1s linear infinite;
+             vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+  <div id="status"><span class="spinner"></span> ส่งคำสั่งไป GitHub แล้ว — กำลังรอเริ่มงาน…</div>
+  <div id="result"></div>
+  <div class="footer">
+    <a href="https://github.com/<?= repo ?>/actions" target="_blank">ดูสถานะ build บน GitHub →</a>
+  </div>
+<script>
+  const CORRELATION_ID = <?= JSON.stringify(correlationId) ?>;
+  const DRY_RUN = <?= dryRun ? 'true' : 'false' ?>;
+  const POLL_INTERVAL_MS = 5000;
+  const POLL_TIMEOUT_MS = 5 * 60 * 1000;
+  const startedAt = Date.now();
+
+  function setStatus(html) {
+    document.getElementById('status').innerHTML = html;
+  }
+  function renderResultPanel(html) {
+    document.getElementById('result').innerHTML = html;
+    document.getElementById('status').innerHTML = '';
+  }
+
+  function poll() {
+    if (Date.now() - startedAt > POLL_TIMEOUT_MS) {
+      setStatus('⏳ ใช้เวลานานกว่าปกติ — ดูสถานะที่ลิงก์ด้านล่าง');
+      return;
+    }
+    google.script.run
+      .withSuccessHandler(handlePollResult)
+      .withFailureHandler(handlePollError)
+      .pollStatus(CORRELATION_ID);
+  }
+
+  function handlePollError(err) {
+    setStatus('⚠️ poll error: ' + (err && err.message) + ' — กำลังลองใหม่');
+    setTimeout(poll, POLL_INTERVAL_MS);
+  }
+
+  function handlePollResult(res) {
+    if (!res.found) {
+      setStatus('<span class="spinner"></span> รอ GitHub Action เริ่มงาน…');
+      setTimeout(poll, POLL_INTERVAL_MS);
+      return;
+    }
+    if (res.status !== 'completed') {
+      setStatus('<span class="spinner"></span> กำลังรันบน GitHub (' + res.status + ')…');
+      setTimeout(poll, POLL_INTERVAL_MS);
+      return;
+    }
+    if (res.conclusion === 'success') {
+      google.script.run
+        .withSuccessHandler(d => renderSuccess(d, res.htmlUrl))
+        .fetchResult(res.runId, 'sync-result');
+    } else {
+      google.script.run
+        .withSuccessHandler(e => renderError(e, res.htmlUrl))
+        .fetchResult(res.runId, 'sync-errors');
+    }
+  }
+
+  function renderSuccess(data, runUrl) {
+    if (!data || !data.changed_files || data.changed_files.length === 0) {
+      renderResultPanel('<p>✅ ' + (DRY_RUN ? 'ไม่มีอะไรจะเปลี่ยน — Sheets ตรงกับ dashboard แล้ว'
+                                            : 'Publish สำเร็จ (แต่ไม่มีไฟล์ที่ต้องอัปเดต)') + '</p>');
+      return;
+    }
+    const items = data.changed_files.map(f => '<li>' + f + '</li>').join('');
+    const verb = DRY_RUN ? 'จะมีการเปลี่ยนแปลง' : '✅ Publish สำเร็จ — เปลี่ยน';
+    renderResultPanel('<p>' + verb + ' ' + data.changed_files.length + ' ไฟล์:</p><ul>' + items + '</ul>');
+  }
+
+  function renderError(errors, runUrl) {
+    if (!errors || errors.length === 0) {
+      renderResultPanel('<p>❌ Publish ไม่สำเร็จ (ไม่ทราบสาเหตุ) — ดูรายละเอียดบน GitHub</p>');
+      return;
+    }
+    const grouped = {};
+    errors.forEach(e => {
+      const k = e.tab || '(ทั่วไป)';
+      (grouped[k] = grouped[k] || []).push(e);
+    });
+    let html = '<p>❌ พบข้อผิดพลาด ' + errors.length + ' จุด:</p>';
+    Object.entries(grouped).forEach(([tab, errs]) => {
+      html += '<div class="err-tab">▸ ' + tab + '</div><ul>';
+      errs.forEach(e => {
+        const f = e.field ? '<span class="err-field">' + e.field + ':</span> ' : '';
+        html += '<li>' + f + (e.message_th || e.message_en) + '</li>';
+      });
+      html += '</ul>';
+    });
+    html += '<p>กรุณาแก้ไขใน Sheets แล้วลอง Publish ใหม่</p>';
+    renderResultPanel(html);
+  }
+
+  setTimeout(poll, 2000); // wait briefly so the run can register
+</script>
+</body>
+</html>
