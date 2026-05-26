@@ -10,8 +10,27 @@ def _canonical(obj) -> str:
     return json.dumps(obj, ensure_ascii=False, indent=INDENT, sort_keys=True)
 
 
+def _normalize_numbers(obj):
+    """Recursively coerce whole-number floats to int so that 12 and 12.0
+    compare as equal in json_equal().
+
+    Required because the source JSONs under web/src/data/ use inconsistent
+    number-form styles - some files write 12.0, others write 611, and a
+    few mix - so any choice of float vs int in the parser output would
+    show up as a phantom diff against half of the source files even
+    when nothing has actually changed in the workbook.
+    """
+    if isinstance(obj, float) and obj.is_integer():
+        return int(obj)
+    if isinstance(obj, dict):
+        return {k: _normalize_numbers(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_normalize_numbers(x) for x in obj]
+    return obj
+
+
 def json_equal(a, b) -> bool:
-    return _canonical(a) == _canonical(b)
+    return _canonical(_normalize_numbers(a)) == _canonical(_normalize_numbers(b))
 
 
 def write_charts(charts: list[ChartData], out_dir: Path) -> list[str]:
