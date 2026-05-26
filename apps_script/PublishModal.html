@@ -78,12 +78,28 @@
     if (res.conclusion === 'success') {
       google.script.run
         .withSuccessHandler(d => renderSuccess(d, res.htmlUrl))
+        .withFailureHandler(err => handleFetchResultError(err, res.htmlUrl))
         .fetchResult(res.runId, 'sync-result');
     } else {
       google.script.run
         .withSuccessHandler(e => renderError(e, res.htmlUrl))
+        .withFailureHandler(err => handleFetchResultError(err, res.htmlUrl))
         .fetchResult(res.runId, 'sync-errors');
     }
+  }
+
+  function handleFetchResultError(err, runUrl) {
+    // Surface the error in the modal instead of leaving the spinner running
+    // forever. The error usually means we got a non-success HTTP response
+    // from GitHub or Azure (artifact-download two-step dance failed),
+    // which should be diagnosable from Cloud logs.
+    const msg = (err && err.message) ? err.message : String(err);
+    renderResultPanel(
+      '<p>❌ โหลดผลจาก GitHub ไม่สำเร็จ:</p>' +
+      '<pre style="font-size:12px;color:#475569;white-space:pre-wrap;">' +
+      msg.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'})[c]) +
+      '</pre><p>ดูรายละเอียดเพิ่มเติม: <a href="' + runUrl + '" target="_blank">' + runUrl + '</a></p>'
+    );
   }
 
   function renderSuccess(data, runUrl) {

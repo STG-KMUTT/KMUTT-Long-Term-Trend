@@ -157,9 +157,38 @@ function _downloadArtifactJson(runId, artifactName, fileInsideZip) {
   const artifact = (JSON.parse(listResp.getContentText()).artifacts || [])
     .find(a => a.name === artifactName);
   if (!artifact) return null;
-  const zipResp = UrlFetchApp.fetch(artifact.archive_download_url, {
-    headers: _ghHeaders(pat), followRedirects: true,
+  // GitHub artifact download is a two-step dance:
+  //   1) Hit api.github.com with our PAT - returns 302 Location to a signed
+  //      Azure Blob Storage URL with the credentials baked into the query
+  //      string.
+  //   2) Hit the Azure URL WITHOUT the Authorization header. If we send the
+  //      GitHub PAT to Azure it returns:
+  //        401 InvalidAuthenticationInfo (XML body)
+  //      which is what bit us when UrlFetchApp.fetch(..., followRedirects:true)
+  //      forwarded the Authorization header through the redirect automatically.
+  const redirectResp = UrlFetchApp.fetch(artifact.archive_download_url, {
+    headers: _ghHeaders(pat),
+    followRedirects: false,
+    muteHttpExceptions: true,
   });
+  const redirectCode = redirectResp.getResponseCode();
+  if (redirectCode !== 302 && redirectCode !== 301) {
+    Logger.log(`[artifact] unexpected non-redirect status=${redirectCode} body(first 200)=${redirectResp.getContentText().slice(0, 200)}`);
+    return null;
+  }
+  const signedUrl = redirectResp.getHeaders().Location || redirectResp.getHeaders().location;
+  if (!signedUrl) {
+    Logger.log('[artifact] redirect response has no Location header');
+    return null;
+  }
+  const zipResp = UrlFetchApp.fetch(signedUrl, {
+    followRedirects: true,
+    muteHttpExceptions: true,
+  });
+  if (zipResp.getResponseCode() !== 200) {
+    Logger.log(`[artifact] signed-url fetch failed code=${zipResp.getResponseCode()}`);
+    return null;
+  }
   const blobs = Utilities.unzip(zipResp.getBlob().setContentType('application/zip'));
   const file = blobs.find(b => b.getName() === fileInsideZip);
   return file ? JSON.parse(file.getDataAsString('UTF-8')) : null;
