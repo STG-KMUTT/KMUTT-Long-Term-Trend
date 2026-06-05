@@ -1,5 +1,8 @@
 # KMUTT Long-Term Trends
 
+> 👋 **กลับมาทำงานต่อหลังหายไปนาน?** อ่าน [`docs/HANDOFF.md`](docs/HANDOFF.md) ก่อน —
+> สรุปสถานะ, สิ่งที่ค้าง, และสิ่งที่ต้องเช็ก (credentials หมดอายุ ฯลฯ)
+
 Interactive bilingual (TH/EN) web dashboard built from the annual
 *KMUTT Trend* PowerPoint. Currently a **prototype** showing 3 of 22 charts —
 to validate the look + tech stack before scaling to the full deck.
