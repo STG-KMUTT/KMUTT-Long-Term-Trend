@@ -3,11 +3,14 @@
 > 👋 **กลับมาทำงานต่อหลังหายไปนาน?** อ่าน [`docs/HANDOFF.md`](docs/HANDOFF.md) ก่อน —
 > สรุปสถานะ, สิ่งที่ค้าง, และสิ่งที่ต้องเช็ก (credentials หมดอายุ ฯลฯ)
 
-Interactive bilingual (TH/EN) web dashboard built from the annual
-*KMUTT Trend* PowerPoint. Currently a **prototype** showing 3 of 22 charts —
-to validate the look + tech stack before scaling to the full deck.
+Interactive bilingual (TH/EN) web dashboard of long-term KMUTT trends,
+originally derived from the annual *KMUTT Trend* PowerPoint. It currently
+renders **20 charts across 4 sections** (Education, Personnel, Research,
+Finance), with data driven live from a Google Sheets workbook.
 
 Audience: KMUTT executives. Public read access (no login). Hosted on GitHub Pages.
+Live data flow is in production — data collectors publish from Sheets and the
+site redeploys automatically (see [Updating data](#updating-data)).
 
 ## Repo layout
 
@@ -15,7 +18,7 @@ Audience: KMUTT executives. Public read access (no login). Hosted on GitHub Page
 .
 ├── KMUTT Long Term Trend 2568-(@19052569).pptx   ← source deck (input)
 ├── extract_pptx.py        ← dumps raw slide text (debug / overview)
-├── build_chart_json.py    ← extracts chart data → web/src/data/*.json
+├── build_chart_json.py    ← DEPRECATED legacy PPTX→JSON generator (kept for reference)
 ├── slides_full.txt        ← gitignored text dump
 └── web/                   ← the React app
     ├── src/
@@ -62,13 +65,16 @@ completed.
 ## Deployment (GitHub Pages)
 
 The workflow at `.github/workflows/deploy.yml` builds and deploys automatically
-when you push to `main`. One-time setup:
+when you push to `main`. (Day-to-day data updates go through the Sheets flow above,
+which deploys via `sync-from-sheets.yml`.)
 
-1. Push this repo to GitHub (e.g. `github.com/<org>/<repo>`).
-2. In the repo's **Settings → Pages**, set **Source** to **GitHub Actions**.
+**Live site:** https://strategykmutt-star.github.io/KMUTT-Long-Term-Trend-2568/
+
+One-time setup (already done for this repo — kept here for reference / re-setup):
+
+1. Push this repo to GitHub.
+2. In **Settings → Pages**, set **Source** to **GitHub Actions**.
 3. Push to `main` — the workflow builds `web/` with `VITE_BASE=/<repo>/` and publishes.
-
-The site will be live at `https://<org>.github.io/<repo>/`.
 
 ## Tech
 

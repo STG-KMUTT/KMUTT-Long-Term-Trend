@@ -152,8 +152,8 @@ pytest               # ควรเขียวทั้งหมด
 
 - ☑ **ยืนยัน flow จริงทำงานครบ** — ทำแล้ว: มี commit `Sync from Sheets` วันที่ 2026-06-05
   จากการกด Publish จริง (เมื่อกลับมาหลัง 1 ปี ควรกดทดสอบซ้ำเผื่อ credentials หมดอายุ — ดูข้อ 5)
-- ☐ **เพิ่มชาร์ตให้ครบ** — README เดิมระบุ "3 of 22 charts" ตอนเป็น prototype
-  ตอนนี้มี 20 ไฟล์ JSON แล้ว — ตรวจว่าครบตามที่ต้องการหรือยัง
+- ☐ **ตรวจจำนวนชาร์ต** — ปัจจุบันมี 20 ชาร์ตใน 4 หมวด (Education, Personnel,
+  Research, Finance) — ตรวจว่าครบตามรายงานปีล่าสุดที่ต้องการหรือยัง
 - ☐ **เพิ่ม `actionlint.exe` ใน `.gitignore`** — มีไฟล์ binary นี้ค้างไม่ track อยู่
   (เป็นเครื่องมือ lint GitHub workflow บน Windows ไม่ควร commit)
 - ☐ **ลบ legacy PPTX flow** — `build_chart_json.py` deprecated แล้ว
