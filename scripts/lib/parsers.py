@@ -1,5 +1,26 @@
 """Parsers convert Sheets API row data (list of lists) into typed dicts."""
-from .types import StyleChart, StyleSeries, ChartData
+from .types import StyleChart, StyleSeries, ChartData, Bilingual
+
+
+def parse_takeaways(rows: list[list[str]]) -> dict[str, Bilingual]:
+    """Parse the 📝 TAKEAWAYS tab into {chart_id: {th, en}}.
+
+    Schema: chart_id | takeaway_th | takeaway_en  (first row is a header).
+    Blank rows and rows with a blank chart_id are skipped. Rows whose TH and
+    EN are both blank are skipped too, so an empty cell never overrides the
+    web's authored fallback (web/src/data/takeaways.ts). An empty input list
+    (tab absent) yields {} — the tab is optional by design.
+    """
+    out: dict[str, Bilingual] = {}
+    for row in rows[1:]:
+        if not row or not row[0].strip():
+            continue
+        chart_id, th, en = (row + ["", "", ""])[:3]
+        th, en = th.strip(), en.strip()
+        if not th and not en:
+            continue
+        out[chart_id.strip()] = {"th": th, "en": en}
+    return out
 
 
 def parse_style_charts(rows: list[list[str]]) -> dict[str, StyleChart]:

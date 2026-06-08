@@ -23,6 +23,8 @@ def make_fake_client():
     ]
     # style-series fixture already only has students-all entries
     client.get_style_series.return_value = json.loads((FIX / "style-series-rows.json").read_text(encoding="utf-8"))
+    # TAKEAWAYS tab is optional; default to absent (empty) for happy-path tests.
+    client.get_takeaways.return_value = []
     return client
 
 def test_run_sync_writes_json_and_returns_changed_list(tmp_path):
@@ -38,6 +40,24 @@ def test_run_sync_dry_run_does_not_write(tmp_path):
     assert result["status"] == "success"
     assert "students-all.json" in result["changed_files"]
     assert not (tmp_path / "students-all.json").exists()
+
+def test_run_sync_merges_takeaway_when_present(tmp_path):
+    client = make_fake_client()
+    client.get_takeaways.return_value = [
+        ["chart_id", "takeaway_th", "takeaway_en"],
+        ["students-all", "ประเด็นไทย", "English point"],
+    ]
+    result = run_sync(client, out_dir=tmp_path, dry_run=False)
+    assert result["status"] == "success"
+    written = json.loads((tmp_path / "students-all.json").read_text(encoding="utf-8"))
+    assert written["key_takeaway"] == {"th": "ประเด็นไทย", "en": "English point"}
+
+def test_run_sync_omits_takeaway_when_absent(tmp_path):
+    client = make_fake_client()  # get_takeaways → [] by default
+    result = run_sync(client, out_dir=tmp_path, dry_run=False)
+    assert result["status"] == "success"
+    written = json.loads((tmp_path / "students-all.json").read_text(encoding="utf-8"))
+    assert "key_takeaway" not in written
 
 def test_run_sync_returns_errors_on_validation_failure(tmp_path):
     client = make_fake_client()

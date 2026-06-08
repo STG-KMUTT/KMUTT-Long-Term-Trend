@@ -3,7 +3,7 @@
 Mirrors the JSON schema defined in
 docs/superpowers/specs/2026-05-25-google-sheets-data-source-design.md
 """
-from typing import TypedDict, Literal
+from typing import TypedDict, Literal, NotRequired
 
 
 class Bilingual(TypedDict):
@@ -35,6 +35,10 @@ class ChartData(TypedDict):
     series: list[SeriesData]
     methodology: Bilingual
     source: Bilingual
+    # Editorial "Key takeaway", sourced from the 📝 TAKEAWAYS tab. Optional:
+    # only attached when that tab supplies non-blank text (see sync_from_sheets).
+    # The web falls back to web/src/data/takeaways.ts when this is absent.
+    key_takeaway: NotRequired[Bilingual]
 
 
 class StyleChart(TypedDict):

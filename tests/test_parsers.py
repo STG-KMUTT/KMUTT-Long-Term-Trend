@@ -2,7 +2,9 @@
 import json
 from pathlib import Path
 import pytest
-from scripts.lib.parsers import parse_style_charts, parse_style_series, parse_chart_tab
+from scripts.lib.parsers import (
+    parse_style_charts, parse_style_series, parse_chart_tab, parse_takeaways,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -39,6 +41,39 @@ def test_parse_style_series_handles_multiple_flags():
         ["x", "y", "#000000", "emphasis,is_cumulative"],
     ]
     assert parse_style_series(rows)[("x", "y")]["flags"] == ["emphasis", "is_cumulative"]
+
+
+def test_parse_takeaways_keys_by_chart_id():
+    rows = [
+        ["chart_id", "takeaway_th", "takeaway_en"],
+        ["students-all", "ไทย", "EN"],
+        ["patents", "ไทย2", "EN2"],
+    ]
+    assert parse_takeaways(rows) == {
+        "students-all": {"th": "ไทย", "en": "EN"},
+        "patents": {"th": "ไทย2", "en": "EN2"},
+    }
+
+def test_parse_takeaways_empty_input_returns_empty():
+    # Tab absent → get_takeaways() returns [] → no takeaways.
+    assert parse_takeaways([]) == {}
+
+def test_parse_takeaways_skips_blank_and_both_empty_rows():
+    rows = [
+        ["chart_id", "takeaway_th", "takeaway_en"],
+        ["", "", ""],                 # blank chart_id → skip
+        ["students-all", "  ", "  "],  # both blank → skip (don't override fallback)
+        ["patents", "ไทย", ""],        # one side filled → keep
+    ]
+    assert parse_takeaways(rows) == {"patents": {"th": "ไทย", "en": ""}}
+
+def test_parse_takeaways_tolerates_short_rows():
+    # A row with only chart_id + TH (Sheets trims trailing empty cells).
+    rows = [
+        ["chart_id", "takeaway_th", "takeaway_en"],
+        ["students-all", "ไทยเท่านั้น"],
+    ]
+    assert parse_takeaways(rows) == {"students-all": {"th": "ไทยเท่านั้น", "en": ""}}
 
 
 def test_parse_chart_tab_returns_expected_chartdata():

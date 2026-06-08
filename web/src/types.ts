@@ -27,4 +27,8 @@ export interface ChartData {
   series: ChartSeries[]
   methodology: Bilingual
   source: Bilingual
+  /** Editorial "Key takeaway", sourced from the 📝 TAKEAWAYS tab in Sheets.
+   *  Optional: when absent or blank, the UI falls back to the authored
+   *  defaults in data/takeaways.ts. */
+  key_takeaway?: Bilingual
 }
