@@ -101,6 +101,10 @@ def build_chart_tab_values(chart: dict) -> list[list]:
         ["METHODOLOGY (EN)", chart["methodology"]["en"]],
         ["SOURCE (TH)", chart["source"]["th"]],
         ["SOURCE (EN)", chart["source"]["en"]],
+        # Per-chart editorial "Key takeaway" (optional). Seeded from JSON;
+        # collector edits it here like the other text fields.
+        ["KEY TAKEAWAY (TH)", (chart.get("key_takeaway") or {}).get("th", "")],
+        ["KEY TAKEAWAY (EN)", (chart.get("key_takeaway") or {}).get("en", "")],
         ["", ""],
         ["— data table ↓ —"],
         ["series_key →"] + [s["key"] for s in chart["series"]],
@@ -150,19 +154,6 @@ def build_style_series_rows(charts: list[dict]) -> list[list]:
                 f for f in ("emphasis", "exclude_from_stack", "is_cumulative") if s.get(f)
             )
             rows.append([c["id"], s["key"], s["color"], flags])
-    return rows
-
-
-def build_takeaways_rows(charts: list[dict]) -> list[list]:
-    """Rows for the 📝 TAKEAWAYS tab: one editable row per chart.
-
-    Seeded from each chart JSON's `key_takeaway` (present after the first sync
-    that reads a populated tab); blank when absent. The data collector edits
-    columns B/C here, then Publishes — exactly like title/methodology."""
-    rows = [["chart_id", "takeaway_th", "takeaway_en"]]
-    for c in charts:
-        tk = c.get("key_takeaway") or {}
-        rows.append([c["id"], tk.get("th", ""), tk.get("en", "")])
     return rows
 
 
@@ -241,16 +232,6 @@ def main():
     ws = sh.add_worksheet(title="🎨 STYLE-series", rows=max(50, len(rows) + 5), cols=5)
     ws.update("A1", rows, value_input_option="RAW")
 
-    # 3b) Create 📝 TAKEAWAYS tab. Unlike the STYLE tabs this one is
-    #     collector-EDITABLE (it holds the "Key takeaway" text shown under
-    #     each chart), so it gets no dev-only protection — just a frozen
-    #     header row. The web falls back to web/src/data/takeaways.ts for any
-    #     chart whose row here is blank.
-    rows = build_takeaways_rows(charts)
-    ws = sh.add_worksheet(title="📝 TAKEAWAYS", rows=max(40, len(rows) + 5), cols=3)
-    ws.update("A1", rows, value_input_option="RAW")
-    ws.freeze(rows=1)
-
     # 4) Create one tab per chart, capturing each tab's gid so the INDEX
     #    HYPERLINKs can target the right tab.
     chart_gid: dict[str, int] = {}
@@ -260,7 +241,7 @@ def main():
                               cols=1 + len(c["series"]) + 1)
         ws.update("A1", values, value_input_option="RAW")
         ws.update_tab_color(_rgb_to_hex(SECTION_COLOR[c["section"]]))
-        ws.freeze(rows=17)
+        ws.freeze(rows=19)  # through the "Year (พ.ศ.)" header (spec row 19)
         chart_gid[c["id"]] = ws.id  # gspread Worksheet.id == Sheets gid
 
     # 5) Create INDEX tab with HYPERLINKs that target each tab's real gid.
@@ -336,20 +317,22 @@ def _reset_workbook_state(sh):
 
 def _apply_chart_tab_guardrails(sh, charts, chart_gid, allowed_editors):
     """For every chart tab:
-    - HARD protect rows 1 (chart_id), 13 (table divider), 14 (series_key)
+    - HARD protect rows 1 (chart_id), 15 (table divider), 16 (series_key)
       with editors-allowlist (warningOnly would NOT block workbook editors)
-    - Data validation: year column A from row 18 = integer 2500-2700
-    - Data validation: value columns from row 18 = numeric OR empty
+    - Data validation: year column A from row 20 = integer 2500-2700
+    - Data validation: value columns from row 20 = numeric OR empty
     - Conditional format: highlight duplicate year rows
     - Conditional format: highlight blank required-text cells (rows 3-6, 8-11)
+    Row indices account for the KEY TAKEAWAY (TH/EN) rows at 12-13 (1-indexed),
+    which push the data-table block down by two rows.
     """
     requests = []
     for c in charts:
         gid = chart_gid[c["id"]]
         num_series = len(c["series"])
 
-        # Hard-protect rows 1, 13, 14 (0-indexed: 0, 12, 13) with allowlist
-        for r in (0, 12, 13):
+        # Hard-protect rows 1, 15, 16 (0-indexed: 0, 14, 15) with allowlist
+        for r in (0, 14, 15):
             requests.append({
                 "addProtectedRange": {
                     "protectedRange": {
@@ -361,14 +344,14 @@ def _apply_chart_tab_guardrails(sh, charts, chart_gid, allowed_editors):
                 }
             })
 
-        # Year column (A) from row 18 onward.
+        # Year column (A) from row 20 onward.
         # Accept either a plain BE year in [2500, 2700] OR a NNNN-NNNN BE
         # range with both endpoints in [2500, 2700]. The *-3yr charts and
         # patents row 1 use range format ("2542-2544" etc), so a naive
         # NUMBER_BETWEEN rule would reject 6 of the 20 charts on Day 1.
         #
         # Tightening (round 7):
-        # - Scalar branch adds `A18=INT(A18)` so fractional values like
+        # - Scalar branch adds `A20=INT(A20)` so fractional values like
         #   `2500.5` are rejected at entry time (Layer 2 catches them too
         #   via re.match(r"\d{4}"), but Layer 1 is supposed to be the
         #   entry-time gate).
@@ -377,18 +360,18 @@ def _apply_chart_tab_guardrails(sh, charts, chart_gid, allowed_editors):
         #   but Sheets data validation is the first line of defence).
         year_formula = (
             '=OR('
-              'AND(ISNUMBER(A18),A18=INT(A18),A18>=2500,A18<=2700),'
+              'AND(ISNUMBER(A20),A20=INT(A20),A20>=2500,A20<=2700),'
               'AND('
-                'REGEXMATCH(A18&"","^\\d{4}-\\d{4}$"),'
-                'VALUE(LEFT(A18,4))>=2500,VALUE(LEFT(A18,4))<=2700,'
-                'VALUE(RIGHT(A18,4))>=2500,VALUE(RIGHT(A18,4))<=2700,'
-                'VALUE(LEFT(A18,4))<=VALUE(RIGHT(A18,4))'
+                'REGEXMATCH(A20&"","^\\d{4}-\\d{4}$"),'
+                'VALUE(LEFT(A20,4))>=2500,VALUE(LEFT(A20,4))<=2700,'
+                'VALUE(RIGHT(A20,4))>=2500,VALUE(RIGHT(A20,4))<=2700,'
+                'VALUE(LEFT(A20,4))<=VALUE(RIGHT(A20,4))'
               ')'
             ')'
         )
         requests.append({
             "setDataValidation": {
-                "range": {"sheetId": gid, "startRowIndex": 17, "startColumnIndex": 0, "endColumnIndex": 1},
+                "range": {"sheetId": gid, "startRowIndex": 19, "startColumnIndex": 0, "endColumnIndex": 1},
                 "rule": {
                     "condition": {"type": "CUSTOM_FORMULA",
                                   "values": [{"userEnteredValue": year_formula}]},
@@ -397,31 +380,31 @@ def _apply_chart_tab_guardrails(sh, charts, chart_gid, allowed_editors):
                 }
             }
         })
-        # Value columns from row 18 — numeric OR blank
+        # Value columns from row 20 — numeric OR blank
         requests.append({
             "setDataValidation": {
-                "range": {"sheetId": gid, "startRowIndex": 17,
+                "range": {"sheetId": gid, "startRowIndex": 19,
                           "startColumnIndex": 1, "endColumnIndex": 1 + num_series},
                 "rule": {
                     "condition": {"type": "CUSTOM_FORMULA",
-                                  "values": [{"userEnteredValue": "=OR(ISNUMBER(B18),B18=\"\")"}]},
+                                  "values": [{"userEnteredValue": "=OR(ISNUMBER(B20),B20=\"\")"}]},
                     "inputMessage": "ค่าต้องเป็นตัวเลขหรือว่างเปล่า",
                     "strict": True,
                 }
             }
         })
         # Conditional format: duplicate year rows.
-        # IMPORTANT: the AND(A18<>"") guard is necessary. A naked
-        # COUNTIF(A:A,A18)>1 treats blank cells as duplicates of each
+        # IMPORTANT: the AND(A20<>"") guard is necessary. A naked
+        # COUNTIF(A:A,A20)>1 treats blank cells as duplicates of each
         # other, so every empty future-year row would highlight red the
         # instant bootstrap finishes.
         requests.append({
             "addConditionalFormatRule": {
                 "rule": {
-                    "ranges": [{"sheetId": gid, "startRowIndex": 17, "startColumnIndex": 0, "endColumnIndex": 1}],
+                    "ranges": [{"sheetId": gid, "startRowIndex": 19, "startColumnIndex": 0, "endColumnIndex": 1}],
                     "booleanRule": {
                         "condition": {"type": "CUSTOM_FORMULA",
-                                      "values": [{"userEnteredValue": "=AND(A18<>\"\",COUNTIF(A:A,A18)>1)"}]},
+                                      "values": [{"userEnteredValue": "=AND(A20<>\"\",COUNTIF(A:A,A20)>1)"}]},
                         "format": {"backgroundColor": PINK},
                     }
                 },

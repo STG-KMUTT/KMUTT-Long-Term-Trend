@@ -16,9 +16,19 @@ def test_chart_tab_values_metadata_layout():
     rows = build_chart_tab_values(SAMPLE)
     assert rows[0] == ["Chart ID", "students-all"]
     assert rows[2] == ["TITLE (TH)", "x"]
-    assert rows[13] == ["series_key →", "bachelor", "total"]
-    assert rows[17] == ["2566", 1, 3]
-    assert rows[18] == ["2567", 2, 4]
+    # KEY TAKEAWAY rows (idx 11/12) — blank when the JSON has no key_takeaway.
+    assert rows[11] == ["KEY TAKEAWAY (TH)", ""]
+    assert rows[12] == ["KEY TAKEAWAY (EN)", ""]
+    # Data-table block sits two rows lower than the original schema.
+    assert rows[15] == ["series_key →", "bachelor", "total"]
+    assert rows[19] == ["2566", 1, 3]
+    assert rows[20] == ["2567", 2, 4]
+
+def test_chart_tab_values_seeds_key_takeaway_from_json():
+    sample = {**SAMPLE, "key_takeaway": {"th": "ไทย", "en": "EN"}}
+    rows = build_chart_tab_values(sample)
+    assert rows[11] == ["KEY TAKEAWAY (TH)", "ไทย"]
+    assert rows[12] == ["KEY TAKEAWAY (EN)", "EN"]
 
 def test_style_series_emits_flags_csv():
     rows = build_style_series_rows([SAMPLE])

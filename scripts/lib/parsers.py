@@ -1,26 +1,5 @@
 """Parsers convert Sheets API row data (list of lists) into typed dicts."""
-from .types import StyleChart, StyleSeries, ChartData, Bilingual
-
-
-def parse_takeaways(rows: list[list[str]]) -> dict[str, Bilingual]:
-    """Parse the 📝 TAKEAWAYS tab into {chart_id: {th, en}}.
-
-    Schema: chart_id | takeaway_th | takeaway_en  (first row is a header).
-    Blank rows and rows with a blank chart_id are skipped. Rows whose TH and
-    EN are both blank are skipped too, so an empty cell never overrides the
-    web's authored fallback (web/src/data/takeaways.ts). An empty input list
-    (tab absent) yields {} — the tab is optional by design.
-    """
-    out: dict[str, Bilingual] = {}
-    for row in rows[1:]:
-        if not row or not row[0].strip():
-            continue
-        chart_id, th, en = (row + ["", "", ""])[:3]
-        th, en = th.strip(), en.strip()
-        if not th and not en:
-            continue
-        out[chart_id.strip()] = {"th": th, "en": en}
-    return out
+from .types import StyleChart, StyleSeries, ChartData
 
 
 def parse_style_charts(rows: list[list[str]]) -> dict[str, StyleChart]:
@@ -56,8 +35,11 @@ def parse_style_series(rows: list[list[str]]) -> dict[tuple[str, str], StyleSeri
     return out
 
 
-DATA_START_ROW = 17  # 0-indexed: row 18 in spec = index 17
-YEAR_HEADER_ROW = 16  # 0-indexed: row 17 in spec = "Year (พ.ศ.)"
+# Row layout (0-indexed). KEY TAKEAWAY (TH/EN) occupy rows 11 and 12, so the
+# data-table block (divider, series headers, year sentinel, data) sits two rows
+# lower than the original metadata-only schema.
+DATA_START_ROW = 19   # first data row (spec row 20)
+YEAR_HEADER_ROW = 18  # "Year (พ.ศ.)" sentinel (spec row 19)
 
 
 def parse_chart_tab(
@@ -69,7 +51,7 @@ def parse_chart_tab(
 
     Preserves column positions in the series_key row so the validator can
     detect blank/duplicate keys instead of silently shifting data columns.
-    Verifies a sentinel cell (A17 = "Year ...") to catch the case where
+    Verifies a sentinel cell (A19 = "Year ...") to catch the case where
     the data collector deleted an entire metadata row (which would shift
     all rows below and silently misalign the parser).
     """
@@ -87,7 +69,7 @@ def parse_chart_tab(
     year_header = rows[YEAR_HEADER_ROW][0].strip() if rows[YEAR_HEADER_ROW] else ""
     if not year_header.lower().startswith("year"):
         raise ValueError(
-            f"expected 'Year (พ.ศ.)' header at A17, got '{year_header}'. "
+            f"expected 'Year (พ.ศ.)' header at A19, got '{year_header}'. "
             f"This usually means a row was accidentally deleted; please "
             f"undo and try again."
         )
@@ -95,12 +77,12 @@ def parse_chart_tab(
     def cell(r: int) -> str:
         return rows[r][1].strip() if len(rows[r]) > 1 else ""
 
-    # Series header at rows 13,14,15 (0-indexed). Determine the
+    # Series header at rows 15,16,17 (0-indexed). Determine the
     # rightmost non-blank column in the entire header block; truncate
     # trailing all-blank columns but keep mid-block blanks.
-    raw_keys = list(rows[13][1:]) if len(rows[13]) > 1 else []
-    raw_names_th = list(rows[14][1:]) if len(rows[14]) > 1 else []
-    raw_names_en = list(rows[15][1:]) if len(rows[15]) > 1 else []
+    raw_keys = list(rows[15][1:]) if len(rows[15]) > 1 else []
+    raw_names_th = list(rows[16][1:]) if len(rows[16]) > 1 else []
+    raw_names_en = list(rows[17][1:]) if len(rows[17]) > 1 else []
     width = max(len(raw_keys), len(raw_names_th), len(raw_names_en))
     # Right-trim columns that are blank in ALL three header rows
     while width > 0:
@@ -119,7 +101,7 @@ def parse_chart_tab(
     names_th = [at(raw_names_th, i) for i in range(width)]
     names_en = [at(raw_names_en, i) for i in range(width)]
 
-    # Data table from row 17 onward (0-indexed).
+    # Data table from row 19 onward (0-indexed).
     #
     # Skipping rule: only skip rows that are ENTIRELY blank (year + every
     # value column). If the year cell is blank but any data cell has a
@@ -180,7 +162,7 @@ def parse_chart_tab(
         s["values"] = [int(v) if isinstance(v, float) and v.is_integer() else v
                        for v in s["values"]]
 
-    return {
+    result: ChartData = {
         "id": chart_id,
         "section": style_c["section"],
         "chart_type": style_c["chart_type"],
@@ -191,3 +173,10 @@ def parse_chart_tab(
         "methodology": {"th": cell(7), "en": cell(8)},
         "source": {"th": cell(9), "en": cell(10)},
     }
+    # Editorial "Key takeaway" lives in its own two rows (idx 11 = TH, 12 = EN),
+    # like TITLE/METHODOLOGY. Attach only when non-blank so the web keeps
+    # falling back to web/src/data/takeaways.ts for charts not yet filled in.
+    tk_th, tk_en = cell(11), cell(12)
+    if tk_th or tk_en:
+        result["key_takeaway"] = {"th": tk_th, "en": tk_en}
+    return result

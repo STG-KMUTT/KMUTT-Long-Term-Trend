@@ -10,6 +10,8 @@
   ["METHODOLOGY (EN)", "Data as of semester 2..."],
   ["SOURCE (TH)", "หนังสือรายงานประจำปี..."],
   ["SOURCE (EN)", "Annual reports..."],
+  ["KEY TAKEAWAY (TH)", "ประเด็นสำคัญทดสอบ"],
+  ["KEY TAKEAWAY (EN)", "Test takeaway"],
   ["", ""],
   ["— data table ↓ —", "", "", ""],
   ["series_key →", "bachelor", "graduate", "total"],
