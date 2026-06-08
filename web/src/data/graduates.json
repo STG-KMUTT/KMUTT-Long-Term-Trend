@@ -51,7 +51,6 @@
         "th": "ปริญญาตรี",
         "en": "Bachelor's"
       },
-      "color": "#f29400",
       "values": [
         611,
         609,
@@ -85,7 +84,8 @@
         2626,
         2649,
         2730
-      ]
+      ],
+      "color": "#f29400"
     },
     {
       "key": "graduate",
@@ -93,7 +93,6 @@
         "th": "บัณฑิตศึกษา",
         "en": "Graduate (Master's + Ph.D.)"
       },
-      "color": "#1e6091",
       "values": [
         75,
         84,
@@ -127,7 +126,8 @@
         553,
         672,
         620
-      ]
+      ],
+      "color": "#1e6091"
     },
     {
       "key": "total",
@@ -135,7 +135,6 @@
         "th": "รวม",
         "en": "Total"
       },
-      "color": "#0f172a",
       "values": [
         686,
         693,
@@ -170,6 +169,7 @@
         3321,
         3350
       ],
+      "color": "#0f172a",
       "emphasis": true
     }
   ],
@@ -180,5 +180,9 @@
   "source": {
     "th": "หนังสือภาวะการหางานทำของผู้สำเร็จการศึกษา รุ่นปี 2536-2555 และหนังสือสารสนเทศ ปีการศึกษา 2557-2567, กลุ่มงานวิจัยสถาบันและสารสนเทศ สำนักงานยุทธศาสตร์",
     "en": "Graduate Employment Books (1993-2012 cohorts) and Information Books (2014-2024), Institutional Research & Information Unit, Strategy Office"
+  },
+  "key_takeaway": {
+    "th": "จำนวนผู้สำเร็จการศึกษาต่อปีเพิ่มขึ้นราว 6 เท่าสู่จุดสูงสุด ~4,300 คนในปี 2556 ตามการขยายตัวของการรับเข้าโดยมีช่วงเวลาเหลื่อม จากนั้นทรงตัวที่ ~3,300–3,600 คน โดยระดับบัณฑิตศึกษาลดลงมากที่สุด",
+    "en": "Annual graduates grew ~6× to a peak of ~4,300 in 2013, tracking the enrolment boom with a lag, then settled near 3,300–3,600 — with graduate-level completions falling the most."
   }
 }

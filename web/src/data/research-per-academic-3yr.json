@@ -29,7 +29,6 @@
         "th": "ทุนวิจัยต่อบุคลากรสายวิชาการ",
         "en": "Funding per academic staff"
       },
-      "color": "#f29400",
       "values": [
         0.102,
         0.153,
@@ -42,6 +41,7 @@
         0.454,
         0.608
       ],
+      "color": "#f29400",
       "emphasis": true
     }
   ],
@@ -52,5 +52,9 @@
   "source": {
     "th": "หนังสือรายงานประจำปี มจธ., กลุ่มงานวิจัยสถาบันและสารสนเทศ + ศูนย์ส่งเสริมงานวิจัยและทรัพย์สินทางปัญญา สวท.",
     "en": "KMUTT Annual Reports, Institutional Research & Information Unit + Research & IP Promotion Center"
+  },
+  "key_takeaway": {
+    "th": "ทุนวิจัยต่อบุคลากรสายวิชาการเพิ่มขึ้นราว 6 เท่า (0.10 → 0.61 ล้านบาท/คน จากค่าเฉลี่ย 3 ปี) สะท้อนทั้งทุนที่เพิ่มขึ้นและจำนวนอาจารย์ที่ค่อนข้างคงที่",
+    "en": "Research funding per academic staff member grew ~6× (0.10 → 0.61M฿ on a 3-year average), reflecting both rising grants and a stable faculty headcount."
   }
 }

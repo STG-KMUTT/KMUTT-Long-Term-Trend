@@ -48,7 +48,6 @@
         "th": "จำนวนบทความวิจัย",
         "en": "Publications (count)"
       },
-      "color": "#1e6091",
       "values": [
         177,
         245,
@@ -79,7 +78,8 @@
         1263,
         1407,
         1105
-      ]
+      ],
+      "color": "#1e6091"
     },
     {
       "key": "per_academic",
@@ -87,7 +87,6 @@
         "th": "บทความต่อบุคลากรสายวิชาการ",
         "en": "Publications per academic staff"
       },
-      "color": "#f29400",
       "values": [
         0.38,
         0.51,
@@ -119,8 +118,9 @@
         1.57,
         1.24
       ],
-      "is_cumulative": true,
-      "emphasis": true
+      "color": "#f29400",
+      "emphasis": true,
+      "is_cumulative": true
     }
   ],
   "methodology": {
@@ -130,5 +130,9 @@
   "source": {
     "th": "หนังสือรายงานประจำปี มจธ. + ศูนย์ส่งเสริมงานวิจัยและทรัพย์สินทางปัญญา สวท.",
     "en": "KMUTT Annual Reports + Research & IP Promotion Center"
+  },
+  "key_takeaway": {
+    "th": "ผลิตภาพต่ออาจารย์ขึ้นสูงสุดราว 1.9 บทความ/คนช่วงปี 2550–2551 จากนั้นทรงตัวที่ ~1.2–1.6 แม้ผลงานรวมยังสูง สะท้อนฐานอาจารย์ที่ใหญ่ขึ้นและการขยับไปตีพิมพ์ในวารสาร",
+    "en": "Per-faculty productivity peaked near 1.9 papers/person around 2007–2008 and has since settled at ~1.2–1.6, even as total output stayed high — reflecting a larger faculty base and a shift toward journals."
   }
 }

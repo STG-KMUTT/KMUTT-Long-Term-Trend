@@ -28,7 +28,6 @@
         "th": "วารสารระดับนานาชาติ / ภูมิภาค",
         "en": "International / regional journals"
       },
-      "color": "#1e6091",
       "values": [
         59.7,
         94.3,
@@ -36,10 +35,11 @@
         257.7,
         334.7,
         370.3,
-        521.0,
-        858.0,
+        521,
+        858,
         832.3
-      ]
+      ],
+      "color": "#1e6091"
     },
     {
       "key": "intl_conference",
@@ -47,18 +47,18 @@
         "th": "รายงานการประชุมระดับนานาชาติ",
         "en": "International conference proceedings"
       },
-      "color": "#0284c7",
       "values": [
-        94.0,
+        94,
         308.7,
         461.7,
         506.7,
-        466.0,
-        554.0,
-        251.0,
+        466,
+        554,
+        251,
         169.3,
         175.7
-      ]
+      ],
+      "color": "#0284c7"
     },
     {
       "key": "natl_conference",
@@ -66,18 +66,18 @@
         "th": "รายงานการประชุมระดับประเทศ",
         "en": "National conference proceedings"
       },
-      "color": "#f29400",
       "values": [
         118.3,
-        282.0,
+        282,
         465.3,
         395.7,
-        318.0,
+        318,
         363.7,
         214.3,
         155.3,
         135.7
-      ]
+      ],
+      "color": "#f29400"
     },
     {
       "key": "natl_journal",
@@ -85,18 +85,18 @@
         "th": "วารสารระดับประเทศ",
         "en": "National journals"
       },
-      "color": "#f59e0b",
       "values": [
         45.7,
         64.7,
-        110.0,
+        110,
         90.3,
-        40.0,
+        40,
         80.3,
         112.3,
-        139.0,
+        139,
         114.7
-      ]
+      ],
+      "color": "#f59e0b"
     },
     {
       "key": "total",
@@ -104,7 +104,6 @@
         "th": "รวม",
         "en": "Total"
       },
-      "color": "#0f172a",
       "values": [
         317.7,
         749.7,
@@ -116,6 +115,7 @@
         1321.7,
         1258.3
       ],
+      "color": "#0f172a",
       "emphasis": true,
       "exclude_from_stack": true
     }
@@ -127,5 +127,9 @@
   "source": {
     "th": "หนังสือรายงานประจำปี มจธ., กลุ่มงานวิจัยสถาบันและสารสนเทศ + Scival + KIRIM",
     "en": "KMUTT Annual Reports, Institutional Research & Information Unit + Scival + KIRIM"
+  },
+  "key_takeaway": {
+    "th": "ภาพค่าเฉลี่ย 3 ปีทำให้การขยับด้านคุณภาพชัดเจน บทความวารสารนานาชาติเพิ่มราว 14 เท่า ขณะที่รายงานการประชุมขึ้นสูงสุดช่วงปี 2551–2557 แล้วลดลง",
+    "en": "The 3-year view makes the quality shift clear — international-journal output rose ~14×, while conference proceedings peaked around 2008–2014 and then declined."
   }
 }

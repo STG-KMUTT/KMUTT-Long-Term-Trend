@@ -29,7 +29,6 @@
         "th": "หลักสูตรภาษาไทย",
         "en": "Thai programs"
       },
-      "color": "#f29400",
       "values": [
         110,
         109,
@@ -41,7 +40,8 @@
         104,
         102,
         103
-      ]
+      ],
+      "color": "#f29400"
     },
     {
       "key": "international",
@@ -49,7 +49,6 @@
         "th": "หลักสูตรนานาชาติ",
         "en": "International programs"
       },
-      "color": "#1e6091",
       "values": [
         34,
         34,
@@ -61,7 +60,8 @@
         41,
         45,
         45
-      ]
+      ],
+      "color": "#1e6091"
     },
     {
       "key": "english",
@@ -69,7 +69,6 @@
         "th": "หลักสูตรภาษาอังกฤษ",
         "en": "English programs"
       },
-      "color": "#10b981",
       "values": [
         3,
         3,
@@ -81,7 +80,8 @@
         5,
         5,
         5
-      ]
+      ],
+      "color": "#10b981"
     },
     {
       "key": "bilingual",
@@ -89,7 +89,6 @@
         "th": "หลักสูตรสองภาษา",
         "en": "Bilingual programs"
       },
-      "color": "#8b5cf6",
       "values": [
         4,
         1,
@@ -101,7 +100,8 @@
         1,
         1,
         1
-      ]
+      ],
+      "color": "#8b5cf6"
     }
   ],
   "methodology": {
@@ -111,5 +111,9 @@
   "source": {
     "th": "หนังสือสารสนเทศ ปีการศึกษา 2559-2568, กลุ่มงานวิจัยสถาบันและสารสนเทศ สำนักงานยุทธศาสตร์ มจธ.",
     "en": "Information Books 2016-2025, Institutional Research & Information Unit, Strategy Office, KMUTT"
+  },
+  "key_takeaway": {
+    "th": "จำนวนสาขาวิชารวมค่อนข้างคงที่ (~150 สาขา) แต่โครงสร้างกำลังเป็นสากลมากขึ้น หลักสูตรนานาชาติเพิ่มจาก 34 เป็น 45 สาขา (+32%) ขณะที่หลักสูตรภาษาไทยลดลงเล็กน้อย",
+    "en": "The total program count is stable (~150), but the mix is internationalising — international programs grew from 34 to 45 (+32%) while Thai programs edged down."
   }
 }

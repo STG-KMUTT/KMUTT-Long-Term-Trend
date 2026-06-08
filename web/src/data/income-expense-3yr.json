@@ -28,7 +28,6 @@
         "th": "รายรับ",
         "en": "Revenue"
       },
-      "color": "#1e6091",
       "values": [
         1255.06,
         1367.14,
@@ -40,6 +39,7 @@
         4072.63,
         4300.25
       ],
+      "color": "#1e6091",
       "emphasis": true
     },
     {
@@ -48,7 +48,6 @@
         "th": "รายจ่าย",
         "en": "Expenditure"
       },
-      "color": "#f29400",
       "values": [
         884.24,
         1169.93,
@@ -59,7 +58,8 @@
         3740.36,
         3936.16,
         4580.65
-      ]
+      ],
+      "color": "#f29400"
     },
     {
       "key": "net",
@@ -67,7 +67,6 @@
         "th": "รายรับสูงกว่ารายจ่าย",
         "en": "Net surplus / (deficit)"
       },
-      "color": "#10b981",
       "values": [
         370.82,
         197.21,
@@ -78,7 +77,8 @@
         194.29,
         136.47,
         -280.4
-      ]
+      ],
+      "color": "#10b981"
     }
   ],
   "methodology": {
@@ -88,5 +88,9 @@
   "source": {
     "th": "กลุ่มงานบัญชี สำนักงานคลัง (ข้อมูลผ่านการตรวจสอบจาก สตง. แล้ว)",
     "en": "Accounting Group, Finance Office (audited by Office of the Auditor General)"
+  },
+  "key_takeaway": {
+    "th": "เมื่อเฉลี่ย 3 ปี รอบ 2566–2568 เป็นรอบแรกที่ดุลสุทธิติดลบ ยืนยันว่าการขาดดุลล่าสุดเป็นแนวโน้ม ไม่ใช่เหตุการณ์ชั่วคราว",
+    "en": "On a 3-year average, the 2023–2025 window is the first with a negative net balance, confirming the recent deficits are a trend rather than a one-off."
   }
 }

@@ -51,7 +51,6 @@
         "th": "ทำงานแล้ว",
         "en": "Employed"
       },
-      "color": "#10b981",
       "values": [
         85.33,
         83.42,
@@ -85,7 +84,8 @@
         58.25,
         67.68,
         49.14
-      ]
+      ],
+      "color": "#10b981"
     },
     {
       "key": "studying",
@@ -93,7 +93,6 @@
         "th": "ศึกษาต่อ",
         "en": "Continuing studies"
       },
-      "color": "#1e6091",
       "values": [
         8.88,
         12.01,
@@ -127,7 +126,8 @@
         4.91,
         5.18,
         8.46
-      ]
+      ],
+      "color": "#1e6091"
     },
     {
       "key": "unemployed",
@@ -135,7 +135,6 @@
         "th": "ยังไม่ได้ทำงานและอื่น ๆ",
         "en": "Unemployed / other"
       },
-      "color": "#e11d48",
       "values": [
         5.8,
         4.57,
@@ -169,7 +168,8 @@
         36.84,
         27.13,
         42.39
-      ]
+      ],
+      "color": "#e11d48"
     }
   ],
   "methodology": {
@@ -179,5 +179,9 @@
   "source": {
     "th": "หนังสือภาวะการหางานทำ รุ่นปี 2536-2557, กลุ่มงานวิจัยสถาบันฯ + ระบบ K-Job (http://hermes.kmutt.ac.th/kjob/)",
     "en": "Graduate Employment Books (1993-2014 cohorts), Institutional Research Group + K-Job system"
+  },
+  "key_takeaway": {
+    "th": "การมีงานทำภายใน 1 ปีของบัณฑิตปริญญาตรีปกติอยู่ที่ ~60–80% และผันผวนตามภาวะเศรษฐกิจ ตัวเลขที่ดูต่ำในปี 2567 (49%) เกิดจากช่วงเก็บข้อมูลที่ยังไม่ครบ 1 ปี ไม่ใช่การจ้างงานที่ลดลงจริง",
+    "en": "Bachelor's employment within a year typically runs 60–80% and swings with the economy. The low 2024 figure (49%) reflects an incomplete <1-year survey window, not a real drop in hiring."
   }
 }

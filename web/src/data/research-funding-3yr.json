@@ -30,7 +30,6 @@
         "th": "แหล่งทุนภายนอก",
         "en": "External funding"
       },
-      "color": "#1e6091",
       "values": [
         24.4,
         36.8,
@@ -43,7 +42,8 @@
         248.2,
         381.1,
         480.1
-      ]
+      ],
+      "color": "#1e6091"
     },
     {
       "key": "national_budget",
@@ -51,20 +51,20 @@
         "th": "งบประมาณแผ่นดิน",
         "en": "National budget"
       },
-      "color": "#f29400",
       "values": [
         10.1,
         13.3,
         23.3,
         23.4,
-        36.0,
+        36,
         46.1,
-        80.0,
+        80,
         59.8,
         148.8,
         0,
         0
-      ]
+      ],
+      "color": "#f29400"
     },
     {
       "key": "internal",
@@ -72,7 +72,6 @@
         "th": "เงินรายได้",
         "en": "Internal"
       },
-      "color": "#10b981",
       "values": [
         0.3,
         0.4,
@@ -85,7 +84,8 @@
         3.8,
         4.9,
         5.5
-      ]
+      ],
+      "color": "#10b981"
     },
     {
       "key": "other",
@@ -93,7 +93,6 @@
         "th": "อื่น ๆ",
         "en": "Other"
       },
-      "color": "#8b5cf6",
       "values": [
         null,
         null,
@@ -102,11 +101,12 @@
         null,
         3.8,
         63.7,
-        30.0,
+        30,
         9.2,
         0.5,
         0
-      ]
+      ],
+      "color": "#8b5cf6"
     },
     {
       "key": "total",
@@ -114,7 +114,6 @@
         "th": "รวม",
         "en": "Total"
       },
-      "color": "#0f172a",
       "values": [
         34.8,
         50.4,
@@ -124,10 +123,11 @@
         226.3,
         326.8,
         294.5,
-        410.0,
+        410,
         386.5,
         485.6
       ],
+      "color": "#0f172a",
       "emphasis": true,
       "exclude_from_stack": true
     }
@@ -139,5 +139,9 @@
   "source": {
     "th": "หนังสือรายงานประจำปี 2557-2568, กลุ่มงานวิจัยสถาบันและสารสนเทศ",
     "en": "Annual Reports 2014-2025, Institutional Research & Information Unit"
+  },
+  "key_takeaway": {
+    "th": "เมื่อดูค่าเฉลี่ย 3 ปี งบประมาณวิจัยเพิ่มขึ้นต่อเนื่องจาก ~35 เป็น ~486 ล้านบาท ยืนยันการเติบโตระยะยาวที่มั่นคงแม้มีความผันผวนรายปีจากโครงการก้อนใหญ่",
+    "en": "On a 3-year smoothed basis, research funding rose steadily from ~35M฿ to ~486M฿, confirming sustained long-term growth despite year-to-year volatility from large one-off grants."
   }
 }

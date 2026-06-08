@@ -48,7 +48,6 @@
         "th": "วารสารระดับนานาชาติ / ภูมิภาค",
         "en": "International / regional journals"
       },
-      "color": "#1e6091",
       "values": [
         30,
         44,
@@ -79,7 +78,8 @@
         814,
         857,
         826
-      ]
+      ],
+      "color": "#1e6091"
     },
     {
       "key": "intl_conference",
@@ -87,7 +87,6 @@
         "th": "รายงานการประชุมระดับนานาชาติ",
         "en": "International conference proceedings"
       },
-      "color": "#0284c7",
       "values": [
         74,
         59,
@@ -118,7 +117,8 @@
         189,
         208,
         130
-      ]
+      ],
+      "color": "#0284c7"
     },
     {
       "key": "natl_conference",
@@ -126,7 +126,6 @@
         "th": "รายงานการประชุมระดับประเทศ",
         "en": "National conference proceedings"
       },
-      "color": "#f29400",
       "values": [
         53,
         96,
@@ -157,7 +156,8 @@
         129,
         180,
         98
-      ]
+      ],
+      "color": "#f29400"
     },
     {
       "key": "natl_journal",
@@ -165,7 +165,6 @@
         "th": "วารสารระดับประเทศ",
         "en": "National journals"
       },
-      "color": "#f59e0b",
       "values": [
         20,
         46,
@@ -196,7 +195,8 @@
         131,
         162,
         51
-      ]
+      ],
+      "color": "#f59e0b"
     },
     {
       "key": "total",
@@ -204,7 +204,6 @@
         "th": "รวม",
         "en": "Total"
       },
-      "color": "#0f172a",
       "values": [
         177,
         245,
@@ -236,6 +235,7 @@
         1407,
         1105
       ],
+      "color": "#0f172a",
       "emphasis": true,
       "exclude_from_stack": true
     }
@@ -247,5 +247,9 @@
   "source": {
     "th": "หนังสือรายงานประจำปี มจธ., กลุ่มงานวิจัยสถาบันและสารสนเทศ + Scival + KIRIM (สำนักงานวิจัยนวัตกรรมและพันธมิตร)",
     "en": "KMUTT Annual Reports, Institutional Research & Information Unit + Scival + KIRIM"
+  },
+  "key_takeaway": {
+    "th": "ผลงานตีพิมพ์เพิ่มขึ้นราว 7 เท่าเป็นกว่า 1,400 ชิ้น/ปี และโครงสร้างขยับสู่แหล่งคุณภาพสูงขึ้น บทความวารสารนานาชาติเพิ่มเป็น ~830 ชิ้น/ปี ขณะที่รายงานการประชุมลดลงมากตั้งแต่กลางทศวรรษ 2550",
+    "en": "Output grew ~7× to over 1,400/year, and the mix shifted toward higher-impact venues — international-journal articles climbed to ~830/year while conference proceedings fell sharply since the mid-2010s."
   }
 }

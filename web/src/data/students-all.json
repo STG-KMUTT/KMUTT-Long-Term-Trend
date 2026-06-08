@@ -52,7 +52,6 @@
         "th": "ปริญญาตรี",
         "en": "Bachelor's"
       },
-      "color": "#f29400",
       "values": [
         3097,
         3370,
@@ -87,7 +86,8 @@
         11905,
         12084,
         12253
-      ]
+      ],
+      "color": "#f29400"
     },
     {
       "key": "graduate",
@@ -95,7 +95,6 @@
         "th": "บัณฑิตศึกษา",
         "en": "Graduate (Master's + Ph.D.)"
       },
-      "color": "#1e6091",
       "values": [
         551,
         594,
@@ -130,7 +129,8 @@
         2577,
         2566,
         2472
-      ]
+      ],
+      "color": "#1e6091"
     },
     {
       "key": "total",
@@ -138,7 +138,6 @@
         "th": "รวม",
         "en": "Total"
       },
-      "color": "#0f172a",
       "values": [
         3648,
         3964,
@@ -174,6 +173,7 @@
         14650,
         14725
       ],
+      "color": "#0f172a",
       "emphasis": true
     }
   ],
@@ -184,5 +184,9 @@
   "source": {
     "th": "หนังสือรายงานประจำปี/หนังสือสารสนเทศ 2548-2568, สำนักงานทะเบียนนักศึกษา, สำนักบัณฑิตศึกษาฯ และ JGSEE",
     "en": "Annual reports & Information Books 2005-2025, Registrar's Office, Graduate Studies Office, and JGSEE"
+  },
+  "key_takeaway": {
+    "th": "จำนวนนักศึกษาทั้งหมดเพิ่มขึ้นราว 3 เท่าสู่จุดสูงสุด ~17,900 คนในปี 2556 ก่อนลดลงมาที่ ~14,700 คน ระดับปริญญาตรีทรงตัวราว 12,000 คน ขณะที่บัณฑิตศึกษาลดลงกว่าครึ่งจากจุดสูงสุด ทำให้สัดส่วนนักศึกษาเอนไปทางปริญญาตรีมากขึ้น",
+    "en": "Total enrolment roughly tripled to a peak of ~17,900 in 2013 before easing to ~14,700. Bachelor's has plateaued near 12,000 while graduate enrolment more than halved from its peak, shifting the student mix back toward undergraduates."
   }
 }

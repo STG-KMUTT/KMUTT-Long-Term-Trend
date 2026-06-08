@@ -47,7 +47,6 @@
         "th": "รายรับ",
         "en": "Revenue"
       },
-      "color": "#1e6091",
       "values": [
         434.91,
         1233.41,
@@ -78,6 +77,7 @@
         4261.55,
         4515.55
       ],
+      "color": "#1e6091",
       "emphasis": true
     },
     {
@@ -86,7 +86,6 @@
         "th": "รายจ่าย",
         "en": "Expenditure"
       },
-      "color": "#f29400",
       "values": [
         283.17,
         1078.23,
@@ -116,7 +115,8 @@
         4452.62,
         4525.61,
         4763.71
-      ]
+      ],
+      "color": "#f29400"
     },
     {
       "key": "net",
@@ -124,7 +124,6 @@
         "th": "รายรับสูงกว่ารายจ่าย",
         "en": "Net surplus / (deficit)"
       },
-      "color": "#10b981",
       "values": [
         151.74,
         155.18,
@@ -144,9 +143,9 @@
         953.77,
         367.86,
         232.74,
-        851.0,
+        851,
         214.91,
-        215.0,
+        215,
         152.96,
         134.99,
         167.67,
@@ -154,7 +153,8 @@
         -328.97,
         -264.06,
         -248.16
-      ]
+      ],
+      "color": "#10b981"
     }
   ],
   "methodology": {
@@ -164,5 +164,9 @@
   "source": {
     "th": "กลุ่มงานบัญชี สำนักงานคลัง (ข้อมูลผ่านการตรวจสอบจาก สตง. แล้ว)",
     "en": "Accounting Group, Finance Office (audited by Office of the Auditor General)"
+  },
+  "key_takeaway": {
+    "th": "รายรับเติบโตราว 10 เท่านับตั้งแต่เป็นมหาวิทยาลัยในกำกับฯ (2541) แต่ระยะหลังรายจ่ายโตเร็วกว่า ปีงบประมาณ 2566–2568 ขาดดุลเป็นครั้งแรกในประวัติศาสตร์ เป็นการเปลี่ยนเชิงโครงสร้างที่ควรติดตามใกล้ชิด",
+    "en": "Revenue grew ~10× since autonomy (1998), but expenditure has recently grown faster — FY2023–2025 posted the first operating deficits on record, a structural shift worth close monitoring."
   }
 }

@@ -54,7 +54,6 @@
         "th": "พนักงาน",
         "en": "University employees (พนักงาน)"
       },
-      "color": "#1e6091",
       "values": [
         null,
         null,
@@ -91,7 +90,8 @@
         1779,
         1810,
         1834
-      ]
+      ],
+      "color": "#1e6091"
     },
     {
       "key": "uni_temporary",
@@ -99,7 +99,6 @@
         "th": "ลูกจ้างมหาวิทยาลัย",
         "en": "University temporary"
       },
-      "color": "#f59e0b",
       "values": [
         22,
         24,
@@ -136,7 +135,8 @@
         742,
         736,
         738
-      ]
+      ],
+      "color": "#f59e0b"
     },
     {
       "key": "civil_servant",
@@ -144,7 +144,6 @@
         "th": "ข้าราชการ",
         "en": "Civil servants"
       },
-      "color": "#0284c7",
       "values": [
         610,
         595,
@@ -181,7 +180,8 @@
         85,
         76,
         61
-      ]
+      ],
+      "color": "#0284c7"
     },
     {
       "key": "perm_temporary",
@@ -189,7 +189,6 @@
         "th": "ลูกจ้างประจำ",
         "en": "Permanent temporary"
       },
-      "color": "#94a3b8",
       "values": [
         150,
         149,
@@ -226,7 +225,8 @@
         26,
         23,
         20
-      ]
+      ],
+      "color": "#94a3b8"
     },
     {
       "key": "total",
@@ -234,7 +234,6 @@
         "th": "บุคลากรทั้งหมด",
         "en": "Total staff"
       },
-      "color": "#0f172a",
       "values": [
         782,
         768,
@@ -272,6 +271,7 @@
         2645,
         2653
       ],
+      "color": "#0f172a",
       "emphasis": true,
       "exclude_from_stack": true
     }
@@ -283,5 +283,9 @@
   "source": {
     "th": "หนังสือสารสนเทศในปีการศึกษานั้น ๆ, กลุ่มงานวิจัยสถาบันและสารสนเทศ + สำนักงานบริหารทรัพยากรบุคคล",
     "en": "Annual Information Books, Institutional Research & Information Unit + HR Office"
+  },
+  "key_takeaway": {
+    "th": "บุคลากรรวมเพิ่มขึ้นราว 3.4 เท่าเป็น ~2,650 คน แต่โครงสร้างพลิกหลังเป็นมหาวิทยาลัยในกำกับของรัฐในปี 2541 ตำแหน่งข้าราชการลดจาก ~900 เหลือ 61 คน ขณะที่ตำแหน่งพนักงานมหาวิทยาลัยเพิ่มจากศูนย์เป็น ~1,800 คน",
+    "en": "Total staff grew ~3.4× to ~2,650, but the composition flipped after KMUTT became autonomous in 1998: civil-servant posts shrank from ~900 to 61, while university-employee positions grew from zero to ~1,800."
   }
 }

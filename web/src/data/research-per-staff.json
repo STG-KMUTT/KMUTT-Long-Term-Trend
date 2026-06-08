@@ -49,7 +49,6 @@
         "th": "ต่อบุคลากรเพื่อการวิจัย",
         "en": "Per research-eligible staff"
       },
-      "color": "#f29400",
       "values": [
         0.12,
         0.11,
@@ -81,7 +80,8 @@
         0.57,
         0.65,
         0.62
-      ]
+      ],
+      "color": "#f29400"
     },
     {
       "key": "per_active_researcher",
@@ -89,7 +89,6 @@
         "th": "ต่อบุคลากรที่ทำงานวิจัย",
         "en": "Per active researcher"
       },
-      "color": "#1e6091",
       "values": [
         0.33,
         0.46,
@@ -122,6 +121,7 @@
         1.19,
         1.32
       ],
+      "color": "#1e6091",
       "emphasis": true
     }
   ],
@@ -132,5 +132,9 @@
   "source": {
     "th": "หนังสือรายงานประจำปี 2550-2568, กลุ่มงานวิจัยสถาบันและสารสนเทศ สำนักงานยุทธศาสตร์",
     "en": "Annual Reports 2007-2025, Institutional Research & Information Unit, Strategy Office"
+  },
+  "key_takeaway": {
+    "th": "ความเข้มข้นของทุนวิจัยต่อบุคลากรที่ทำงานวิจัยจริงเพิ่มขึ้นราว 4 เท่าเป็น ~1.3 ล้านบาท/คน สะท้อนว่าทุนวิจัยเติบโตเร็วกว่ากำลังคนวิจัย",
+    "en": "Funding intensity per active researcher roughly quadrupled to ~1.3M฿, signalling that grants have grown faster than the research workforce."
   }
 }
