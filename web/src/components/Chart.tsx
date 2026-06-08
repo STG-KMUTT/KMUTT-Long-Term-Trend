@@ -87,17 +87,20 @@ export function Chart({ data, height = 380 }: Props) {
         lineStyle: { type: 'dashed', color: '#94a3b8', width: 1.5 },
         label: {
           show: true,
-          // Single horizontal line, anchored at the top of the line and reading
-          // rightward into the plot. 2541/1998 always falls in the early years
-          // of these series, so left-aligning never overflows the right edge.
-          position: 'insideEndTop',
+          // Single horizontal line that HANGS DOWN from just below the top end
+          // of the divider, fully inside the plot. 'insideEndBottom' keeps it
+          // clear of the top edge/legend, so it isn't clipped (insideEndTop sat
+          // on the grid boundary and the upper half got cut off). 2541/1998
+          // always falls in the early years, so left-aligning never overflows
+          // the right edge.
+          position: 'insideEndBottom',
           align: 'left',
           rotate: 0,
           formatter: () => `{yr|${yearLabel(AUTONOMY_YEAR_BE, lang)}}{sep| · }{tx|${UI.autonomy_short[lang]}}`,
           rich: {
-            yr: { fontFamily, fontSize: 12, fontWeight: 'bold', color: '#334155' },
-            sep: { fontFamily, fontSize: 11, color: '#cbd5e1' },
-            tx: { fontFamily, fontSize: 11, color: '#64748b' },
+            yr: { fontFamily, fontSize: 12, fontWeight: 'bold', color: '#334155', lineHeight: 16 },
+            sep: { fontFamily, fontSize: 11, color: '#cbd5e1', lineHeight: 16 },
+            tx: { fontFamily, fontSize: 11, color: '#64748b', lineHeight: 16 },
           },
           backgroundColor: 'rgba(255,255,255,0.92)',
           borderColor: '#e2e8f0',
