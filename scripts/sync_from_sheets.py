@@ -10,9 +10,7 @@ import sys
 from pathlib import Path
 
 from scripts.lib.sheets_client import SheetsClient
-from scripts.lib.parsers import (
-    parse_chart_tab, parse_style_charts, parse_style_series, parse_takeaways,
-)
+from scripts.lib.parsers import parse_chart_tab, parse_style_charts, parse_style_series
 from scripts.lib.validators import validate
 from scripts.lib.writer import write_charts
 
@@ -20,21 +18,15 @@ from scripts.lib.writer import write_charts
 def run_sync(client, out_dir: Path, dry_run: bool) -> dict:
     style_charts = parse_style_charts(client.get_style_charts())
     style_series = parse_style_series(client.get_style_series())
-    takeaways = parse_takeaways(client.get_takeaways())
     tab_rows = client.get_chart_tabs()
 
     parsed = {}
     parse_errors = []
     for tab_name, rows in tab_rows.items():
         try:
-            chart = parse_chart_tab(rows, style_charts, style_series)
-            # Attach the editorial takeaway only when the TAKEAWAYS tab supplies
-            # non-blank text for this chart. Absent → the web falls back to its
-            # authored defaults, so we keep the JSON field off entirely.
-            tk = takeaways.get(chart["id"])
-            if tk:
-                chart["key_takeaway"] = tk
-            parsed[tab_name] = chart
+            # parse_chart_tab now reads the per-chart KEY TAKEAWAY rows directly,
+            # so no separate takeaways tab/merge is needed.
+            parsed[tab_name] = parse_chart_tab(rows, style_charts, style_series)
         except (KeyError, IndexError, ValueError) as e:
             parse_errors.append({
                 "tab": tab_name, "field": None,

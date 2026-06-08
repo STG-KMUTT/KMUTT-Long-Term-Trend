@@ -4,8 +4,7 @@ from typing import Literal
 import gspread
 from google.oauth2.service_account import Credentials
 
-TabKind = Literal["chart", "index", "style-charts", "style-series",
-                  "takeaways", "ignore", "unknown"]
+TabKind = Literal["chart", "index", "style-charts", "style-series", "ignore", "unknown"]
 
 SECTION_PREFIXES = ("EDU-", "PER-", "RES-", "FIN-")
 
@@ -21,8 +20,6 @@ def classify_tab(name: str) -> TabKind:
         return "style-charts"
     if "STYLE-series" in name:
         return "style-series"
-    if "TAKEAWAYS" in name:
-        return "takeaways"
     return "unknown"
 
 
@@ -53,14 +50,3 @@ class SheetsClient:
             if classify_tab(ws.title) == "style-series":
                 return ws.get_all_values()
         raise RuntimeError("STYLE-series tab not found")
-
-    def get_takeaways(self) -> list[list[str]]:
-        """Return the 📝 TAKEAWAYS tab values, or [] if the tab is absent.
-
-        Unlike the STYLE tabs, this one is OPTIONAL — a workbook that
-        predates the takeaways feature has no such tab, and the sync must
-        still succeed (the web falls back to its authored defaults)."""
-        for ws in self._sheet.worksheets():
-            if classify_tab(ws.title) == "takeaways":
-                return ws.get_all_values()
-        return []

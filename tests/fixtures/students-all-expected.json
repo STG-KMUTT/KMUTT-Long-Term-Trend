@@ -11,5 +11,6 @@
     {"key": "total", "name": {"th": "รวม", "en": "Total"}, "color": "#0f172a", "values": [14471, 14482, 14482, 14650, 14725], "emphasis": true}
   ],
   "methodology": {"th": "ทุกปีเป็นข้อมูล ณ ภาคการศึกษาที่ 2...", "en": "Data as of semester 2..."},
-  "source": {"th": "หนังสือรายงานประจำปี...", "en": "Annual reports..."}
+  "source": {"th": "หนังสือรายงานประจำปี...", "en": "Annual reports..."},
+  "key_takeaway": {"th": "ประเด็นสำคัญทดสอบ", "en": "Test takeaway"}
 }

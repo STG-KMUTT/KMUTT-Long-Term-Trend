@@ -2,9 +2,7 @@
 import json
 from pathlib import Path
 import pytest
-from scripts.lib.parsers import (
-    parse_style_charts, parse_style_series, parse_chart_tab, parse_takeaways,
-)
+from scripts.lib.parsers import parse_style_charts, parse_style_series, parse_chart_tab
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -43,39 +41,6 @@ def test_parse_style_series_handles_multiple_flags():
     assert parse_style_series(rows)[("x", "y")]["flags"] == ["emphasis", "is_cumulative"]
 
 
-def test_parse_takeaways_keys_by_chart_id():
-    rows = [
-        ["chart_id", "takeaway_th", "takeaway_en"],
-        ["students-all", "ไทย", "EN"],
-        ["patents", "ไทย2", "EN2"],
-    ]
-    assert parse_takeaways(rows) == {
-        "students-all": {"th": "ไทย", "en": "EN"},
-        "patents": {"th": "ไทย2", "en": "EN2"},
-    }
-
-def test_parse_takeaways_empty_input_returns_empty():
-    # Tab absent → get_takeaways() returns [] → no takeaways.
-    assert parse_takeaways([]) == {}
-
-def test_parse_takeaways_skips_blank_and_both_empty_rows():
-    rows = [
-        ["chart_id", "takeaway_th", "takeaway_en"],
-        ["", "", ""],                 # blank chart_id → skip
-        ["students-all", "  ", "  "],  # both blank → skip (don't override fallback)
-        ["patents", "ไทย", ""],        # one side filled → keep
-    ]
-    assert parse_takeaways(rows) == {"patents": {"th": "ไทย", "en": ""}}
-
-def test_parse_takeaways_tolerates_short_rows():
-    # A row with only chart_id + TH (Sheets trims trailing empty cells).
-    rows = [
-        ["chart_id", "takeaway_th", "takeaway_en"],
-        ["students-all", "ไทยเท่านั้น"],
-    ]
-    assert parse_takeaways(rows) == {"students-all": {"th": "ไทยเท่านั้น", "en": ""}}
-
-
 def test_parse_chart_tab_returns_expected_chartdata():
     rows = load("students-all-rows.json")
     style_charts = parse_style_charts(load("style-charts-rows.json"))
@@ -85,11 +50,31 @@ def test_parse_chart_tab_returns_expected_chartdata():
     result = parse_chart_tab(rows, style_charts, style_series)
     assert result == expected
 
+def test_parse_chart_tab_reads_key_takeaway_rows():
+    """KEY TAKEAWAY (TH/EN) live in their own rows (idx 11/12) and surface
+    as the optional `key_takeaway` field."""
+    rows = load("students-all-rows.json")
+    style_charts = parse_style_charts(load("style-charts-rows.json"))
+    style_series = parse_style_series(load("style-series-rows.json"))
+    result = parse_chart_tab(rows, style_charts, style_series)
+    assert result["key_takeaway"] == {"th": "ประเด็นสำคัญทดสอบ", "en": "Test takeaway"}
+
+def test_parse_chart_tab_omits_key_takeaway_when_blank():
+    """Both takeaway cells blank → the field is omitted entirely so the web
+    keeps falling back to its authored defaults."""
+    rows = load("students-all-rows.json")
+    rows[11][1] = ""  # KEY TAKEAWAY (TH)
+    rows[12][1] = ""  # KEY TAKEAWAY (EN)
+    style_charts = parse_style_charts(load("style-charts-rows.json"))
+    style_series = parse_style_series(load("style-series-rows.json"))
+    result = parse_chart_tab(rows, style_charts, style_series)
+    assert "key_takeaway" not in result
+
 def test_parse_chart_tab_treats_empty_value_cells_as_none():
     rows = load("students-all-rows.json")
-    # Fixture data rows (0-indexed): 17=2564, 18=2565, 19=2566, 20=2567, 21=2568
+    # Fixture data rows (0-indexed): 19=2564, 20=2565, 21=2566, 22=2567, 23=2568
     # Blank the bachelor 2566 cell → values index 2.
-    rows[19][1] = ""
+    rows[21][1] = ""
     style_charts = parse_style_charts(load("style-charts-rows.json"))
     style_series = parse_style_series(load("style-series-rows.json"))
 
@@ -98,10 +83,10 @@ def test_parse_chart_tab_treats_empty_value_cells_as_none():
     assert bachelor["values"][2] is None
 
 def test_parse_chart_tab_preserves_blank_series_key_position():
-    """Critical: a blank cell in row 14 must NOT cause data columns to shift."""
+    """Critical: a blank cell in row 16 must NOT cause data columns to shift."""
     rows = load("students-all-rows.json")
-    # Blank the "graduate" key in column C of row 14 (0-idx 13)
-    rows[13][2] = ""
+    # Blank the "graduate" key in column C of row 16 (0-idx 15)
+    rows[15][2] = ""
     style_charts = parse_style_charts(load("style-charts-rows.json"))
     style_series = parse_style_series(load("style-series-rows.json"))
 
@@ -121,8 +106,8 @@ def test_parse_chart_tab_rejects_blank_year_with_data():
     not silently drop the row (which would erase a year's data from the
     dashboard without any warning)."""
     rows = load("students-all-rows.json")
-    # Blank the year cell for 2566 (0-idx 19, column A) but leave bachelor/etc intact
-    rows[19][0] = ""
+    # Blank the year cell for 2566 (0-idx 21, column A) but leave bachelor/etc intact
+    rows[21][0] = ""
     style_charts = parse_style_charts(load("style-charts-rows.json"))
     style_series = parse_style_series(load("style-series-rows.json"))
 
@@ -135,7 +120,7 @@ def test_parse_chart_tab_skips_completely_blank_rows():
     blank rows in the sheet."""
     rows = load("students-all-rows.json")
     # Wipe the entire last row (2568 + all values)
-    rows[21] = ["", "", "", ""]
+    rows[23] = ["", "", "", ""]
     style_charts = parse_style_charts(load("style-charts-rows.json"))
     style_series = parse_style_series(load("style-series-rows.json"))
 
@@ -146,10 +131,10 @@ def test_parse_chart_tab_skips_completely_blank_rows():
 def test_parse_chart_tab_detects_deleted_metadata_row():
     """Critical: if a user deletes a metadata row (e.g. Name TH), every
     row below shifts up by one. The parser would otherwise silently read
-    Name EN as data values. Sentinel check at A17 must catch this."""
+    Name EN as data values. Sentinel check at A19 must catch this."""
     rows = load("students-all-rows.json")
-    # Simulate "Name TH" row (0-idx 14) being deleted
-    del rows[14]
+    # Simulate "Name TH" row (0-idx 16) being deleted
+    del rows[16]
     style_charts = parse_style_charts(load("style-charts-rows.json"))
     style_series = parse_style_series(load("style-series-rows.json"))
 
@@ -162,7 +147,7 @@ def test_parse_chart_tab_accepts_year_range_strings():
     rows = load("students-all-rows.json")
     # Replace all year cells with range strings
     for i, y in enumerate(["2536-2538", "2539-2541", "2542-2544", "2545-2547", "2548-2550"]):
-        rows[17 + i][0] = y
+        rows[19 + i][0] = y
     style_charts = parse_style_charts(load("style-charts-rows.json"))
     style_series = parse_style_series(load("style-series-rows.json"))
 
