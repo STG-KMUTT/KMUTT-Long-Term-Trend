@@ -2,6 +2,7 @@ import type { ChartData } from '../types'
 import { useLang } from '../i18n'
 import { Chart } from './Chart'
 import { KpiCard } from './KpiCard'
+import { KeyTakeaway } from './KeyTakeaway'
 import { MethodologyNote } from './MethodologyNote'
 import type { UI } from '../i18n'
 
@@ -23,6 +24,7 @@ export function ChartCard({ data, kpiSeriesKey, unitKey }: Props) {
       </header>
       <KpiCard data={data} seriesKey={kpiSeriesKey} unitKey={unitKey} />
       <Chart data={data} />
+      <KeyTakeaway data={data} />
       <MethodologyNote data={data} />
     </article>
   )

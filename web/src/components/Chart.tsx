@@ -2,7 +2,11 @@ import { useEffect, useMemo, useRef } from 'react'
 import * as echarts from 'echarts'
 import type { EChartsOption, LineSeriesOption, BarSeriesOption, ECharts } from 'echarts'
 import type { ChartData, Lang } from '../types'
-import { useLang } from '../i18n'
+import { useLang, UI } from '../i18n'
+
+/** B.E. year KMUTT became Thailand's first autonomous public university
+ *  (มหาวิทยาลัยในกำกับของรัฐ), per พ.ร.บ. มจธ. พ.ศ. 2541. */
+const AUTONOMY_YEAR_BE = '2541'
 
 interface Props {
   data: ChartData
@@ -70,6 +74,41 @@ export function Chart({ data, height = 380 }: Props) {
         barMaxWidth: 28,
       } satisfies BarSeriesOption
     })
+
+    // Vertical divider marking the year KMUTT became an autonomous university.
+    // Only drawn on charts whose timeline contains that exact year (the 3-year
+    // "bucket" charts use ranges like "2539-2541", so indexOf skips them — a
+    // line on a smoothed bucket boundary would be ambiguous).
+    const autonomyIdx = data.categories_buddhist.indexOf(AUTONOMY_YEAR_BE)
+    if (autonomyIdx >= 0 && series.length > 0) {
+      const markLine: LineSeriesOption['markLine'] = {
+        symbol: 'none',
+        silent: true,
+        lineStyle: { type: 'dashed', color: '#94a3b8', width: 1.5 },
+        label: {
+          show: true,
+          // Single horizontal line, anchored at the top of the line and reading
+          // rightward into the plot. 2541/1998 always falls in the early years
+          // of these series, so left-aligning never overflows the right edge.
+          position: 'insideEndTop',
+          align: 'left',
+          rotate: 0,
+          formatter: () => `{yr|${yearLabel(AUTONOMY_YEAR_BE, lang)}}{sep| · }{tx|${UI.autonomy_short[lang]}}`,
+          rich: {
+            yr: { fontFamily, fontSize: 12, fontWeight: 'bold', color: '#334155' },
+            sep: { fontFamily, fontSize: 11, color: '#cbd5e1' },
+            tx: { fontFamily, fontSize: 11, color: '#64748b' },
+          },
+          backgroundColor: 'rgba(255,255,255,0.92)',
+          borderColor: '#e2e8f0',
+          borderWidth: 1,
+          borderRadius: 4,
+          padding: [3, 7],
+        },
+        data: [{ xAxis: cats[autonomyIdx] }],
+      }
+      series[0] = { ...series[0], markLine }
+    }
 
     const hasCumulative =
       data.chart_type === 'clustered-bar' &&

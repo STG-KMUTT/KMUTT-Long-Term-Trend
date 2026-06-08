@@ -153,6 +153,19 @@ def build_style_series_rows(charts: list[dict]) -> list[list]:
     return rows
 
 
+def build_takeaways_rows(charts: list[dict]) -> list[list]:
+    """Rows for the 📝 TAKEAWAYS tab: one editable row per chart.
+
+    Seeded from each chart JSON's `key_takeaway` (present after the first sync
+    that reads a populated tab); blank when absent. The data collector edits
+    columns B/C here, then Publishes — exactly like title/methodology."""
+    rows = [["chart_id", "takeaway_th", "takeaway_en"]]
+    for c in charts:
+        tk = c.get("key_takeaway") or {}
+        rows.append([c["id"], tk.get("th", ""), tk.get("en", "")])
+    return rows
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sheet-id", required=True)
@@ -227,6 +240,16 @@ def main():
     rows = build_style_series_rows(charts)
     ws = sh.add_worksheet(title="🎨 STYLE-series", rows=max(50, len(rows) + 5), cols=5)
     ws.update("A1", rows, value_input_option="RAW")
+
+    # 3b) Create 📝 TAKEAWAYS tab. Unlike the STYLE tabs this one is
+    #     collector-EDITABLE (it holds the "Key takeaway" text shown under
+    #     each chart), so it gets no dev-only protection — just a frozen
+    #     header row. The web falls back to web/src/data/takeaways.ts for any
+    #     chart whose row here is blank.
+    rows = build_takeaways_rows(charts)
+    ws = sh.add_worksheet(title="📝 TAKEAWAYS", rows=max(40, len(rows) + 5), cols=3)
+    ws.update("A1", rows, value_input_option="RAW")
+    ws.freeze(rows=1)
 
     # 4) Create one tab per chart, capturing each tab's gid so the INDEX
     #    HYPERLINKs can target the right tab.
