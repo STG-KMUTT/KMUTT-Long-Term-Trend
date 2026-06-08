@@ -57,7 +57,7 @@ export const UI = {
     finance:   { th: 'การเงิน',    en: 'Finance' },
   },
   key_takeaway:   { th: 'ประเด็นสำคัญ', en: 'Key takeaway' },
-  autonomy_short: { th: 'ม.ในกำกับของรัฐ', en: 'Autonomous univ.' },
+  autonomy_short: { th: 'ปีที่ออกเป็น ม.ในกำกับของรัฐ', en: 'Became an autonomous university' },
   autonomy_full:  { th: 'มจธ. ปรับสถานะเป็นมหาวิทยาลัยในกำกับของรัฐ (พ.ศ. 2541)',
                     en: 'KMUTT became an autonomous university (1998)' },
   methodology:    { th: 'หมายเหตุ',  en: 'Methodology' },
