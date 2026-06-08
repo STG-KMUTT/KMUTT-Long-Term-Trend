@@ -90,18 +90,18 @@ export function Chart({ data, height = 380 }: Props) {
           // Single horizontal line that HANGS DOWN from just below the top end
           // of the divider, fully inside the plot. 'insideEndBottom' keeps it
           // clear of the top edge/legend, so it isn't clipped (insideEndTop sat
-          // on the grid boundary and the upper half got cut off). 2541/1998
-          // always falls in the early years, so left-aligning never overflows
-          // the right edge.
+          // on the grid boundary and the upper half got cut off). The line sits
+          // on the 2541/1998 tick, which is always in the early years, so
+          // left-aligning never overflows the right edge.
           position: 'insideEndBottom',
           align: 'left',
           rotate: 0,
-          formatter: () => `{yr|${yearLabel(AUTONOMY_YEAR_BE, lang)}}{sep| · }{tx|${UI.autonomy_short[lang]}}`,
-          rich: {
-            yr: { fontFamily, fontSize: 12, fontWeight: 'bold', color: '#334155', lineHeight: 16 },
-            sep: { fontFamily, fontSize: 11, color: '#cbd5e1', lineHeight: 16 },
-            tx: { fontFamily, fontSize: 11, color: '#64748b', lineHeight: 16 },
-          },
+          formatter: () => UI.autonomy_short[lang],
+          fontFamily,
+          fontSize: 11,
+          fontWeight: 'bold',
+          color: '#475569',
+          lineHeight: 16,
           backgroundColor: 'rgba(255,255,255,0.92)',
           borderColor: '#e2e8f0',
           borderWidth: 1,
