@@ -183,7 +183,8 @@ on both groups means a second run waits rather than cancelling a running deploy.
 
 - **`GITHUB_TOKEN`** (automatic) — used by the `sync` job's `checkout` step
   and `commit+push` step. Sufficient for pushing to the same repo.
-- **`GITHUB_PAT`** (repository secret) — used only by Apps Script to call
+- **`GITHUB_PAT`** (stored in Apps Script Script Properties — **not** a GitHub
+  repo secret) — used only by Apps Script to call
   `POST /repos/{repo}/dispatches`. A `GITHUB_TOKEN` cannot trigger
   `repository_dispatch` from outside the Actions context.
 
@@ -197,10 +198,12 @@ on both groups means a second run waits rather than cancelling a running deploy.
 - Required scopes (repository-scoped): **Contents: Read and Write**,
   **Actions: Read**.
 - Used by: `apps_script/Code.gs` → `_dispatchSync()`.
-- Stored as: GitHub repository secret `GITHUB_PAT`.
+- Stored as: Apps Script Script Property `GITHUB_PAT` (**not** a GitHub repo
+  secret — the workflow itself uses the automatic `GITHUB_TOKEN`).
 - **To rotate**: generate a new fine-grained PAT in GitHub
-  Settings → Developer settings → Fine-grained tokens, then update the
-  secret at `Settings → Secrets and variables → Actions → GITHUB_PAT`.
+  Settings → Developer settings → Fine-grained tokens (resource owner
+  **STG-KMUTT**, repo `KMUTT-Long-Term-Trend`), then update it in
+  **Apps Script → Project Settings → Script Properties → `GITHUB_PAT`**.
   No workflow re-run needed; the new value takes effect on the next dispatch.
 
 ### GOOGLE_SERVICE_ACCOUNT_JSON
