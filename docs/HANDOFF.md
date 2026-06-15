@@ -7,7 +7,7 @@
 > อะไรน่าจะพัง, และจะเริ่มทำงานต่อยังไง
 >
 > _บันทึกสถานะ ณ วันที่ **2026-05-26** (commit งานสุดท้าย) — เขียนเอกสารนี้ 2026-06-05_
-> _Repo: https://github.com/STG-KMUTT/KMUTT-Long-Term-Trend-2568_
+> _Repo: https://github.com/STG-KMUTT/KMUTT-Long-Term-Trend_
 
 ---
 
@@ -110,7 +110,7 @@ publications, research-funding, patents, income-expense, programs ฯลฯ — 
 
 ### ☐ 5.4 GitHub Pages — ยังเปิดอยู่ไหม
 - Settings → Pages → Source ต้องเป็น **GitHub Actions**
-- เช็กว่าเว็บยัง live: `https://stg-kmutt.github.io/KMUTT-Long-Term-Trend-2568/`
+- เช็กว่าเว็บยัง live: `https://stg-kmutt.github.io/KMUTT-Long-Term-Trend/`
 
 ### ☐ 5.5 Dependency versions — อาจมี breaking changes
 - `gspread` เคยมี breaking change (6.x เปลี่ยน API สี tab — เคยแก้ไปแล้ว)
