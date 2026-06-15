@@ -68,7 +68,7 @@ The workflow at `.github/workflows/deploy.yml` builds and deploys automatically
 when you push to `main`. (Day-to-day data updates go through the Sheets flow above,
 which deploys via `sync-from-sheets.yml`.)
 
-**Live site:** https://strategykmutt-star.github.io/KMUTT-Long-Term-Trend-2568/
+**Live site:** https://stg-kmutt.github.io/KMUTT-Long-Term-Trend-2568/
 
 One-time setup (already done for this repo — kept here for reference / re-setup):
 
