@@ -8,6 +8,12 @@
 >
 > _บันทึกสถานะ ณ วันที่ **2026-05-26** (commit งานสุดท้าย) — เขียนเอกสารนี้ 2026-06-05_
 > _Repo: https://github.com/STG-KMUTT/KMUTT-Long-Term-Trend_
+>
+> _**อัปเดต 2026-06-15:** repo ถูกย้ายจากบัญชีส่วนตัว `strategykmutt-star` → GitHub Org **STG-KMUTT**
+> และเปลี่ยนชื่อ `KMUTT-Long-Term-Trend-2568` → **`KMUTT-Long-Term-Trend`** · secret + variable
+> ติดมากับ transfer (ไม่ต้อง re-add) · regenerate GitHub PAT ใหม่ + อัปเดต Apps Script `REPO`/`HELP_URL` ·
+> ทดสอบกด Publish จริงผ่านครบ (sync→deploy เขียว) ระบบ live ที่
+> `https://stg-kmutt.github.io/KMUTT-Long-Term-Trend/`_
 
 ---
 
@@ -92,9 +98,10 @@ publications, research-funding, patents, income-expense, programs ฯลฯ — 
 - ใช้โดย Apps Script เพื่อยิง `repository_dispatch`
 - Fine-grained PAT มักตั้งหมดอายุ 90 วัน–1 ปี → **เกือบแน่ว่าต้องสร้างใหม่**
 - **อาการเมื่อหมดอายุ:** กด Publish แล้ว modal ค้าง / error 401
-- **วิธีแก้:** สร้าง fine-grained PAT ใหม่ (scope: Contents R/W + Actions R) →
-  อัปเดต GitHub repository secret ชื่อ `GITHUB_PAT`
-  _(รายละเอียด: `docs/architecture.md` ข้อ 6)_
+- **วิธีแก้:** สร้าง fine-grained PAT ใหม่ (resource owner **STG-KMUTT**, repo `KMUTT-Long-Term-Trend`,
+  scope: Contents R/W + Actions R) → อัปเดตใน **Apps Script → Project Settings → Script Properties**
+  ที่ key `GITHUB_PAT` (⚠️ PAT อยู่ใน Apps Script **ไม่ใช่** GitHub repo secret — workflow ใช้ `GITHUB_TOKEN` อัตโนมัติ)
+  _(regenerate ครั้งล่าสุด: 2026-06-15 ตอนย้าย org · รายละเอียด: `docs/architecture.md` ข้อ 6)_
 
 ### ☐ 5.2 Google Service Account Key — อาจถูก disable
 - ใช้โดย `sync_from_sheets.py` ผ่าน gspread เพื่ออ่าน Sheets

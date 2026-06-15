@@ -303,12 +303,12 @@ the Apps Script editor with content.
    |------------|-------------------------------------------------------------|
    | `GITHUB_PAT` | The fine-grained PAT from Step 3                          |
    | `SHEET_ID`   | The Sheet ID from Step 1                                  |
-   | `REPO`       | `org/repo` — e.g. `tayakorn221/kmutt-trends`             |
+   | `REPO`       | `org/repo` — for this repo: `STG-KMUTT/KMUTT-Long-Term-Trend` |
    | `HELP_URL`   | Full URL to `docs/data-collector-guide-th.md` on GitHub   |
 
    For `HELP_URL`, navigate to the file in GitHub and copy the URL from the
    browser, e.g.:
-   `https://github.com/org/repo/blob/main/docs/data-collector-guide-th.md`
+   `https://github.com/STG-KMUTT/KMUTT-Long-Term-Trend/blob/main/docs/data-collector-guide-th.md`
 
 3. Click **Save script properties**.
 
@@ -495,7 +495,7 @@ Provide the following to the data collector (in whatever channel you use):
 1. **Sheet URL** — direct link to the workbook, e.g.:
    `https://docs.google.com/spreadsheets/d/1ABCdefGHIjklMNOpqrSTUvwxYZ/edit`
 2. **Thai guide URL** — link to `docs/data-collector-guide-th.md` on GitHub, e.g.:
-   `https://github.com/org/repo/blob/main/docs/data-collector-guide-th.md`
+   `https://github.com/STG-KMUTT/KMUTT-Long-Term-Trend/blob/main/docs/data-collector-guide-th.md`
 3. Confirm the data collector's Google account has **Editor** access to the Sheet
    (added in Step 2c). If not, add it now via the Share dialog.
 4. Walk them through the Publish menu at least once (or share a screen recording).
